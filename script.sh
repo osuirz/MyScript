@@ -94,6 +94,20 @@ install_options
 case $installoption in 
         1)  iptables -A INPUT -s 127.0.0.1 -j ACCEPT
             iptables -A OUTPUT -s 127.0.0.1 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25565,25566,25567,25568,25569,25570,25571,25572,25573,25574 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25575,25576,25577,25578,25579,25580,25581,25582,25583,25584 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25585,25586,25587,25588,25589,25589,25591,25592,25593,25594 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25595,25596,25597,25598,25599,25600,25601,25602,25603,25604 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25605,25606,25607,25608,25609,25610,25611,25612,25613,25614 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25615,25616,25617,25618,25619,25620,25621,25622,25623,25624 -j ACCEPT
+            iptables -I INPUT -p tcp -m multiport --dports 25625,25626,25627,25628,25629,25630,25631,25632,25633,25634 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25565,25566,25567,25568,25569,25570,25571,25572,25573,25574 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25575,25576,25577,25578,25579,25580,25581,25582,25583,25584 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25585,25586,25587,25588,25589,25589,25591,25592,25593,25594 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25595,25596,25597,25598,25599,25600,25601,25602,25603,25604 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25605,25606,25607,25608,25609,25610,25611,25612,25613,25614 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25615,25616,25617,25618,25619,25620,25621,25622,25623,25624 -j ACCEPT
+            iptables -I OUTPUT -p tcp -m multiport --dports 25625,25626,25627,25628,25629,25630,25631,25632,25633,25634 -j ACCEPT        
             output "As portas foram abertas com sucesso!"
             ;;
         2) history -c
