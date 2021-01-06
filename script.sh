@@ -98,6 +98,5 @@ case $installoption in
             ;;
         2) history -c
            output "O historico da maquina foi limpo com sucesso."
-           ;;
-
-            
+           ;;          
+           esac
