@@ -97,7 +97,7 @@ case $installoption in
             output "As portas foram abertas com sucesso!"
             ;;
         2) history -c
-           output "O historico da maquina foi limpo com sucesso.
+           output "O historico da maquina foi limpo com sucesso."
            ;;
 
             
