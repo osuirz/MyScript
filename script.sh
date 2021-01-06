@@ -28,6 +28,7 @@ options(){
             ;;   
             * ) output "Você não selecionou uma opção valida."
             install_options
+            esac
             }
             #Execucion
 preflight
