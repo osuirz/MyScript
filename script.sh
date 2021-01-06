@@ -11,8 +11,7 @@ output "==================="
     if [ "$EUID" -ne 0 ]; then
         output "Execute com root."
         exit 3
-      fi
-        
+      fi 
 }
 options(){
     output "Selecione uma opção:"
