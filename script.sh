@@ -1,5 +1,11 @@
 # Starting
+output(){
+    echo -e '\e[36m'$1'\e[0m';
+}
 
+warn(){
+    echo -e '\e[31m'$1'\e[0m';
+}
 preflight(){
 
 output "==================="
