@@ -13,22 +13,22 @@ output "==================="
         exit 3
       fi 
 }
-options(){
-    output "Selecione uma opção:"
-    output "[1] Abrir todas as portas."
-    output "[2] Limpar historico."
+install_options(){
+    output "Please select your installation option:"
+    output "[1] Liberar todas as portas."
+    output "[2] Limpar historico da maquina."
     read choice
     case $choice in
         1 ) installoption=1
-            output "Você selecionou abrir as portas da Maquina."
+            output "You have selected ${PANEL} panel installation only."
             ;;
         2 ) installoption=2
-            output "Você selecionou limpar o historico da Maquina."
-            ;;   
-            * ) output "Você não selecionou uma opção valida."
+            output "You have selected ${PANEL_LEGACY} panel installation only."
+            ;;
+        * ) output "You did not enter a valid selection."
             install_options
-            esac
-            }
+    esac
+}
             #Execucion
 preflight
 install_options
