@@ -1477,7 +1477,7 @@ EOF
     ${AUTODEPLOY}
 
     systemctl enable --now wings
-    systemctl start wings
+    systemctl restart wings
     output "Wings ${WINGS} agora foi instalado em seu sistema."
 }
 
