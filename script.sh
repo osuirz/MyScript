@@ -8,39 +8,41 @@ warn(){
     echo -e '\e[31m'$1'\e[0m';
 }
 
-PANEL=v1.2.0
-WINGS=v1.2.0
+PANEL=v1.2.2
+WINGS=v1.2.3
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
 PHPMYADMIN=5.0.4
 
 preflight(){
-    output "Pterodactyl Installation & Upgrade Script"
+    output "Script de Instalação e Atualização do Pterodactyl."
     output "Copyright © 2020 Thien Tran <contact@thientran.io>."
-    output "Please join my Telegram for community support: https://t.me/revenact"
+    output "Telegram do Revenact: https://t.me/revenact"
+    output ""
+    output "Traduzido por yViniSad#0144"
     output ""
 
-    output "Please note that this script is meant to be installed on a fresh OS. Installing it on a non-fresh OS may cause problems."
-    output "Automatic operating system detection initialized..."
+    output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
+    output "Detecção automática do sistema operacional inicializada ..."
 
     os_check
 
     if [ "$EUID" -ne 0 ]; then
-        output "Please run as root."
+        output "Por favor, execute como root."
         exit 3
     fi
 
-    output "Automatic architecture detection initialized..."
+    output "Detecção automática de arquitetura inicializada ..."
     MACHINE_TYPE=`uname -m`
     if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-        output "64-bit server detected! Good to go."
+        output "Servidor de 64 bits detectado! Bom para ir."
         output ""
     else
-        output "Unsupported architecture detected! Please switch to 64-bit (x86_64)."
+        output "Arquitetura não suportada detectada! Mude para 64 bits (x86_64)."
         exit 4
     fi
 
-    output "Automatic virtualization detection initialized..."
+    output "Detecção automática de virtualização inicializada..."
     if [ "$lsb_dist" =  "ubuntu" ]; then
         apt-get update --fix-missing
         apt-get -y install software-properties-common
@@ -54,59 +56,59 @@ preflight(){
     fi
     virt_serv=$(echo $(virt-what))
     if [ "$virt_serv" = "" ]; then
-        output "Virtualization: Bare Metal detected."
+        output "Virtualização: Detectado Bare Metal."
     elif [ "$virt_serv" = "openvz lxc" ]; then
-        output "Virtualization: OpenVZ 7 detected."
+        output "Virtualização: OpenVZ 7 detectado."
     elif [ "$virt_serv" = "xen xen-hvm" ]; then
-        output "Virtualization: Xen-HVM detected."
+        output "Virtualização: Xen-HVM detectado."
     elif [ "$virt_serv" = "xen xen-hvm aws" ]; then
-        output "Virtualization: Xen-HVM on AWS detected."
-        warn "When creating allocations for this node, please use the internal IP as Google Cloud uses NAT routing."
-        warn "Resuming in 10 seconds..."
+        output "Virtualização: Xen-HVM detectado no AWS."
+        warn "Ao criar alocações para este nó, use o IP interno, pois o Google Cloud usa o roteamento NAT."
+        warn "Retomando em 10 segundos ..."
         sleep 10
     else
-        output "Virtualization: $virt_serv detected."
+        output "Virtualização: $virt_serv detectada."
     fi
     output ""
     if [ "$virt_serv" != "" ] && [ "$virt_serv" != "kvm" ] && [ "$virt_serv" != "vmware" ] && [ "$virt_serv" != "hyperv" ] && [ "$virt_serv" != "openvz lxc" ] && [ "$virt_serv" != "xen xen-hvm" ] && [ "$virt_serv" != "xen xen-hvm aws" ]; then
         warn "Unsupported type of virtualization detected. Please consult with your hosting provider whether your server can run Docker or not. Proceed at your own risk."
         warn "No support would be given if your server breaks at any point in the future."
-        warn "Proceed?\n[1] Yes.\n[2] No."
+        warn "Proceed?\n[1] Yes.\n [2] No."
         read choice
         case $choice in 
-            1)  output "Proceeding..."
+            1)  output "Prosseguindo ..."
                 ;;
-            2)  output "Cancelling installation..."
+            2)  output "Cancelando instalação ..."
                 exit 5
                 ;;
         esac
         output ""
     fi
 
-    output "Kernel detection initialized..."
+    output "Detecção de kernel inicializada ..."
     if echo $(uname -r) | grep -q xxxx; then
-        output "OVH kernel detected. This script will not work. Please reinstall your server using a generic/distribution kernel."
-        output "When you are reinstalling your server, click on 'custom installation' and click on 'use distribution' kernel after that."
-        output "You might also want to do custom partitioning, remove the /home partition and give / all the remaining space."
-        output "Please do not hesitate to contact us if you need help regarding this issue."
+        output "Kernel OVH detectado. Este script não funcionará. Reinstale seu servidor usando um kernel genérico / de distribuição."
+        output "Quando você estiver reinstalando seu servidor, clique em 'instalação personalizada' e clique em 'usar distribuição' kernel depois disso."
+        output "Você também pode querer fazer um particionamento personalizado, remover a partição /home/ e dar / todo o espaço restante."
+        output "Não hesite em nos contatar se precisar de ajuda com relação a este problema."
         exit 6
     elif echo $(uname -r) | grep -q pve; then
-        output "Proxmox LXE kernel detected. You have chosen to continue in the last step, therefore we are proceeding at your own risk."
-        output "Proceeding with a risky operation..."
+        output "Kernel Proxmox LXE detectado. Você optou por continuar na última etapa, portanto, prosseguiremos por sua própria conta e risco."
+        output "Prosseguindo com uma operação arriscada..."
     elif echo $(uname -r) | grep -q stab; then
         if echo $(uname -r) | grep -q 2.6; then 
-            output "OpenVZ 6 detected. This server will definitely not work with Docker, regardless of what your provider might say. Exiting to avoid further damages."
+            output "OpenVZ 6 detectado. Este servidor definitivamente não funcionará com o Docker, independentemente do que seu provedor possa dizer. Saindo para evitar maiores danos."
             exit 6
         fi
     elif echo $(uname -r) | grep -q gcp; then
-        output "Google Cloud Platform detected."
-        warn "Please make sure you have a static IP setup, otherwise the system will not work after a reboot."
-        warn "Please also make sure the GCP firewall allows the ports needed for the server to function normally."
-        warn "When creating allocations for this node, please use the internal IP as Google Cloud uses NAT routing."
-        warn "Resuming in 10 seconds..."
+        output "Google Cloud Platform detectado."
+        warn "Certifique-se de ter uma configuração de IP estático, caso contrário, o sistema não funcionará após a reinicialização."
+        warn "Verifique também se o firewall do GCP permite que as portas necessárias para o servidor funcione normalmente."
+        warn "Ao criar alocações para este nó, use o IP interno, pois o Google Cloud usa o roteamento NAT."
+        warn "Retomando em 10 segundos ..."
         sleep 10
     else
-        output "Did not detect any bad kernel. Moving forward..."
+        output "Não detectou nenhum kernel ruim. Seguindo em frente ..."
         output ""
     fi
 }
@@ -124,33 +126,33 @@ os_check(){
     
     if [ "$lsb_dist" =  "ubuntu" ]; then
         if  [ "$dist_version" != "20.04" ] && [ "$dist_version" != "18.04" ]; then
-            output "Unsupported Ubuntu version. Only Ubuntu 20.04 and 18.04 are supported."
+            output "Versão não suportada do Ubuntu. Apenas Ubuntu 20.04 e 18.04 são suportados."
             exit 2
         fi
     elif [ "$lsb_dist" = "debian" ]; then
         if [ "$dist_version" != "10" ]; then
-            output "Unsupported Debian version. Only Debian 10 is supported."
+            output "Versão Debian não suportada. Apenas Debian 10 é suportado."
             exit 2
         fi
     elif [ "$lsb_dist" = "fedora" ]; then
         if [ "$dist_version" != "33" ] && [ "$dist_version" != "32" ]; then
-            output "Unsupported Fedora version. Only Fedora 33 and 32 are supported."
+            output "Versão não suportada do Fedora. Apenas Fedora 33 e 32 são suportados."
             exit 2
         fi
     elif [ "$lsb_dist" = "centos" ]; then
         if [ "$dist_version" != "8" ]; then
-            output "Unsupported CentOS version. Only CentOS Stream and 8 are supported."
+            output "Versão CentOS não suportada. Apenas CentOS Stream e 8 são suportados."
             exit 2
         fi
     elif [ "$lsb_dist" = "rhel" ]; then
         if  [ $dist_version != "8" ]; then
-            output "Unsupported RHEL version. Only RHEL 8 is supported."
+            output "Versão RHEL não suportada. Apenas RHEL 8 é compatível."
             exit 2
         fi
     elif [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "debian" ] && [ "$lsb_dist" != "centos" ]; then
-        output "Unsupported operating system."
+        output "Sistema operacional não compatível."
         output ""
-        output "Supported OS:"
+        output "Sistemas compatível:"
         output "Ubuntu: 20.04, 18.04"
         output "Debian: 10"
         output "Fedora: 33, 32"
@@ -161,172 +163,172 @@ os_check(){
 }
 
 install_options(){
-    output "Please select your installation option:"
-    output "[1] Install the panel ${PANEL}."
-    output "[2] Install the panel ${PANEL_LEGACY}."
-    output "[3] Install the wings ${WINGS}."
-    output "[4] Install the daemon ${DAEMON_LEGACY}."
-    output "[5] Install the panel ${PANEL} and wings ${WINGS}."
-    output "[6] Install the panel ${PANEL_LEGACY} and daemon ${DAEMON_LEGACY}."
-    output "[7] Install the standalone SFTP server."
-    output "[8] Upgrade (1.x) panel to ${PANEL}."
-    output "[9] Upgrade (0.7.x) panel to ${PANEL}."
-    output "[10] Upgrade (0.7.x) panel to ${PANEL_LEGACY}."
-    output "[11] Upgrade (0.6.x) daemon to ${DAEMON_LEGACY}."
-    output "[12] Migrating daemon to wings."
-    output "[13] Upgrade the panel to ${PANEL} and Migrate to wings"
-    output "[14] Upgrade the panel to ${PANEL_LEGACY} and daemon to ${DAEMON_LEGACY}"
-    output "[15] Upgrade the standalone SFTP server to (1.0.5)."
-    output "[16] Make Pterodactyl compatible with the mobile app (only use this after you have installed the panel - check out https://pterodactyl.cloud for more information)."
-    output "[17] Update mobile compatibility."
-    output "[18] Install or update to phpMyAdmin (${PHPMYADMIN}) (only use this after you have installed the panel)."
-    output "[19] Install a standalone database host (only for use on daemon-only installations)."
-    output "[20] Change Pterodactyl theme (${PANEL_LEGACY} Only)."
-    output "[21] Emergency MariaDB root password reset."
-    output "[22] Emergency database host information reset."
+    output "Selecione sua opção de instalação:"
+    output "[1] Instalar o Painel ${PANEL}."
+    output "[2] Instalar o Painel ${PANEL_LEGACY}."
+    output "[3] Instalar o Wings ${WINGS}."
+    output "[4] Instalar o Daemon ${DAEMON_LEGACY}."
+    output "[5] Instalar o Painel ${PANEL} e o Wings ${WINGS}."
+    output "[6] Instalar o Painel ${PANEL_LEGACY} e o Daemon ${DAEMON_LEGACY}."
+    output "[7] Instale o servidor SFTP autônomo."
+    output "[8] Atualizar o Painel (1.x) para a versão ${PANEL}."
+    output "[9] Atualizar o Painel (0.7.x) para a versão ${PANEL}."
+    output "[10] Atualizar o Painel (0.7.x) para a versão ${PANEL_LEGACY}."
+    output "[11] Atualizar o Daemon (0.6.x) para a versão ${DAEMON_LEGACY}."
+    output "[12] Migrando o Deamon para o Wings."
+    output "[13] Atualize o painel para ${PANEL} e migrar para Wings ${WINGS}"
+    output "[14] Uatualize o painel para ${PANEL_LEGACY} e o Daemon para ${DAEMON_LEGACY}"
+    output "[15] Atualize o servidor SFTP autônomo para (1.0.5)."
+    output "[16] Torne o Pterodactyl compatível com o aplicativo móvel (use-o apenas depois de instalar o painel - verifique https://pterodactyl.cloud para mais informações)."
+    output "[17] Atualize a compatibilidade móvel."
+    output "[18] Instale ou atualize para phpMyAdmin (${PHPMYADMIN}) (Só use isso depois de instalar o painel)."
+    output "[19] Instale um host de banco de dados independente (apenas para uso em instalações apenas daemon)."
+    output "[20] Alterar o tema do Painel (${PANEL_LEGACY} Apenas)."
+    output "[21] Redefinição de senha raiz de emergência MariaDB."
+    output "[22] Redefinição das informações do host do banco de dados de emergência."
     read choice
     case $choice in
         1 ) installoption=1
-            output "You have selected ${PANEL} panel installation only."
+            output "Você selecionou apenas a instalação de painel ${PANEL}."
             ;;
         2 ) installoption=2
-            output "You have selected ${PANEL_LEGACY} panel installation only."
+            output "Você selecionou a instalação do painel ${PANEL_LEGACY} apenas."
             ;;
         3 ) installoption=3
-            output "You have selected wings ${WINGS} installation only."
+            output "Você selecionou apenas a instalação do Wings ${WINGS}."
             ;;
         4 ) installoption=4
-            output "You have selected daemon ${DAEMON_LEGACY} installation only."
+            output "Você selecionou apenas a instalação do daemon ${DAEMON_LEGACY}."
             ;;
         5 ) installoption=5
-            output "You have selected ${PANEL} panel and wings ${WINGS} installation."
+            output "Você selecionou ${PANEL} painel e wings ${WINGS} instalação."
             ;;
         6 ) installoption=6
-            output "You have selected ${PANEL_LEGACY} panel and daemon installation."
+            output "Você selecionou o painel ${PANEL_LEGACY} e a instalação do daemon."
             ;;
         7 ) installoption=7
-            output "You have selected to install the standalone SFTP server."
+            output "Você optou por instalar o servidor SFTP autônomo."
             ;;
         8 ) installoption=8
-            output "You have selected to upgrade the panel to ${PANEL}."
+            output "Você optou por atualizar o painel para ${PANEL}."
             ;;
         9 ) installoption=9
-            output "You have selected to upgrade the panel to ${PANEL}."
+            output "Você optou por atualizar o painel para ${PANEL}."
             ;;
         10 ) installoption=10
-            output "You have selected to upgrade the panel to ${PANEL_LEGACY}."
+            output "Você optou por atualizar o painel para ${PANEL_LEGACY}."
             ;;
         11 ) installoption=11
-            output "You have selected to upgrade the daemon to ${DAEMON_LEGACY}."
+            output "Você optou por atualizar o daemon para ${DAEMON_LEGACY}."
             ;;
         12 ) installoption=12
-            output "You have selected to migrate daemon ${DAEMON_LEGACY} to wings ${WINGS}."
+            output "Você optou por migrar o daemon ${DAEMON_LEGACY} para o wings ${WINGS}."
             ;;
         13 ) installoption=13
-            output "You have selected to upgrade both the panel to ${PANEL} and migrating to wings ${WINGS}."
+            output "Você optou por atualizar o painel para ${PANEL} e migrar para as asas ${WINGS}."
             ;;
         14 ) installoption=14
-            output "You have selected to upgrade both the panel to ${PANEL} and daemon to ${DAEMON_LEGACY}."
+            output "Você optou por atualizar o painel para ${PANEL} e o daemon para ${DAEMON_LEGACY}."
             ;;
         15 ) installoption=15
-            output "You have selected to upgrade the standalone SFTP."
+            output "Você optou por atualizar o SFTP autônomo."
             ;;
         16 ) installoption=16
-            output "You have activated mobile app compatibility."
+            output "Você ativou a compatibilidade do aplicativo móvel."
             ;;
         17 ) installoption=17
-            output "You have selected to update the mobile app compatibility."
+            output "Você ativou a compatibilidade do aplicativo móvel"
             ;;
         18 ) installoption=18
-            output "You have selected to install or update phpMyAdmin ${PHPMYADMIN}."
+            output "Você optou por instalar ou atualizar phpMyAdmin ${PHPMYADMIN}."
             ;;
         19 ) installoption=19
-            output "You have selected to install a Database host."
+            output "Você optou por instalar um host de banco de dados."
             ;;
         20 ) installoption=20
-            output "You have selected to change Pterodactyl ${PANEL_LEGACY} only."
+            output "Você optou por alterar apenas o tema do Pterodactyl ${PANEL_LEGACY}."
             ;;
         21 ) installoption=21
-            output "You have selected MariaDB root password reset."
+            output "Você selecionou redefinição de senha de root do MariaDB."
             ;;
         22 ) installoption=22
-            output "You have selected Database Host information reset."
+            output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
-        * ) output "You did not enter a valid selection."
+        * ) output "Você não inseriu uma seleção válida."
             install_options
     esac
 }
 
 webserver_options() {
-    output "Please select which web server you would like to use:\n[1] Nginx (recommended).\n[2] Apache2/httpd."
+    output "Selecione qual servidor web você gostaria de usar: \n [1] Nginx (recomendado). \n [2] Apache2 / httpd."
     read choice
     case $choice in
         1 ) webserver=1
-            output "You have selected Nginx."
+            output "Você selecionou Nginx."
             output ""
             ;;
         2 ) webserver=2
-            output "You have selected Apache2/httpd."
+            output "Você selecionou Apache2 / httpd."
             output ""
             ;;
-        * ) output "You did not enter a valid selection."
+        * ) output "Você não inseriu uma seleção válida."
             webserver_options
     esac
 }
 
 theme_options() {
-    output "Would you like to install one of Fonix's themes?"
-    warn "AS OF NOW, FONIX HAS NOT UPDATED HIS THEME TO 0.7.19 TO FIX THE XSS EXPLOIT IN PTERODACTYL <=0.7.18 YET. DO NOT USE THESE IN PRODUCTION. I HIGHLY RECOMMEND THAT YOU SELECT [1]."
-    output "[1] No."
-    output "[2] Super Pink and Fluffy."
+    output "Gostaria de instalar um dos temas do Fonix?"
+    warn "ATÉ AGORA, A FONIX NÃO ATUALIZOU SEU TEMA PARA 0.7.19 PARA CORRIGIR A EXPLORAÇÃO XSS EM PTERODACTYL <= 0.7.18 AINDA. NÃO USE ESTES NA PRODUÇÃO. RECOMENDO ALTAMENTE QUE SELECIONE [1]."
+    output "[1] Não."
+    output "[2] Super rosa e fofo."
     output "[3] Tango Twist."
-    output "[4] Blue Brick."
+    output "[4] Tijolo Azul."
     output "[5] Minecraft Madness."
     output "[6] Lime Stitch."
-    output "[7] Red Ape."
-    output "[8] BlackEnd Space."
-    output "[9] Nothing But Graphite."
+    output "[7] Macaco Vermelho."
+    output "[8] Espaço BlackEned."
+    output "[9] Nada além de grafite."
     output ""
-    output "You can find out about Fonix's themes here: https://github.com/TheFonix/Pterodactyl-Themes"
+    output "Você pode descobrir mais sobre os temas da Fonix aqui: https://github.com/TheFonix/Pterodactyl-Themes"
     read choice
     case $choice in
         1 ) themeoption=1
-            output "You have selected to install the vanilla Pterodactyl theme."
+            output "Você optou por instalar o tema vanilla Pterodactyl."
             output ""
             ;;
         2 ) themeoption=2
-            output "You have selected to install Fonix's Super Pink and Fluffy theme."
+            output "Você optou por instalar o tema Super rosa e fofo da Fonix."
             output ""
             ;;
         3 ) themeoption=3
-            output "You have selected to install Fonix's Tango Twist theme."
+            output "Você optou por instalar o tema Tango Twist da Fonix."
             output ""
             ;;
         4 ) themeoption=4
-            output "You have selected to install Fonix's Blue Brick theme."
+            output "Você optou por instalar o tema Tijolo Azul da Fonix."
             output ""
             ;;
         5 ) themeoption=5
-            output "You have selected to install Fonix's Minecraft Madness theme."
+            output "Você optou por instalar o tema Minecraft Madness da Fonix."
             output ""
             ;;
         6 ) themeoption=6
-            output "You have selected to install Fonix's Lime Stitch theme."
+            output "Você optou por instalar o tema Lime Stitch da Fonix."
             output ""
             ;;
         7 ) themeoption=7
-            output "You have selected to install Fonix's Red Ape theme."
+            output "Você optou por instalar o tema Macaco Vermelho da Fonix."
             output ""
             ;;
         8 ) themeoption=8
-            output "You have selected to install Fonix's BlackEnd Space theme."
+            output "Você optou por instalar o tema Espaço Preto da Fonix."
             output ""
             ;;
         9 ) themeoption=9
-            output "You have selected to install Fonix's Nothing But Graphite theme."
+            output "Você optou por instalar o tema Nothing But Graphite da Fonix."
             output ""
             ;;
-        * ) output "You did not enter a valid selection."
+        * ) output "Você não inseriu uma seleção válida."
             theme_options
     esac
 }
@@ -338,29 +340,29 @@ required_infos() {
 }
 
 dns_check(){
-    output "Please enter your FQDN (panel.domain.tld):"
+    output "Insira seu FQDN (panel.domain.tld):"
     read FQDN
 
-    output "Resolving DNS..."
+    output "Resolvendo DNS ..."
     SERVER_IP=$(curl -s http://checkip.amazonaws.com)
     DOMAIN_RECORD=$(dig +short ${FQDN})
     if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
         output ""
-        output "The entered domain does not resolve to the primary public IP of this server."
-        output "Please make an A record pointing to your server's IP. For example, if you make an A record called 'panel' pointing to your server's IP, your FQDN is panel.domain.tld"
-        output "If you are using Cloudflare, please disable the orange cloud."
-        output "If you do not have a domain, you can get a free one at https://freenom.com"
+        output "O domínio inserido não resolve para o IP público primário deste servidor."
+        output "Faça um registro A apontando para o IP do seu servidor. Por exemplo, se você fizer um registro A chamado 'painel' apontando para o IP do seu servidor, seu FQDN é panel.domain.tld"
+        output "Se você estiver usando Cloudflare, desative a nuvem laranja."
+        output "Se você não tiver um domínio, pode obter um gratuitamente em https://freenom.com"
         dns_check
     else
-        output "Domain resolved correctly. Good to go..."
+        output "Domínio resolvido corretamente. Bom para ir..."
     fi
 }
 
 theme() {
-    output "Theme installation initialized..."
+    output "A instalação do tema foi inicializada ..."
     cd /var/www/pterodactyl
     if [ "$themeoption" = "1" ]; then
-        output "Keeping Pterodactyl's vanilla theme."
+        output "Mantendo o tema baunilha do Pterodáctilo."
     elif [ "$themeoption" = "2" ]; then
         curl https://raw.githubusercontent.com/TheFonix/Pterodactyl-Themes/master/MasterThemes/PinkAnFluffy/build.sh | sh
     elif [ "$themeoption" = "3" ]; then
@@ -383,7 +385,7 @@ theme() {
 }
 
 repositories_setup(){
-    output "Configuring your repositories..."
+    output "Configurando seus repositórios ..."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install sudo
         apt-get -y install software-properties-common curl apt-transport-https ca-certificates gnupg
@@ -480,7 +482,7 @@ EOF
 }
 
 repositories_setup_0.7.19(){
-    output "Configuring your repositories..."
+    output "Configurando seus repositórios ..."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install sudo
         apt-get -y install software-properties-common dnsutils gpg-agent
@@ -577,7 +579,7 @@ EOF
 }
 
 install_dependencies(){
-    output "Installing dependencies..."
+    output "Instalando dependências ..."
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
         if [ "$webserver" = "1" ]; then
             apt -y install php7.4 php7.4-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} nginx tar unzip git redis-server nginx git wget expect
@@ -633,7 +635,7 @@ install_dependencies(){
 }
 
 install_dependencies_0.7.19(){
-    output "Installing dependencies..."
+    output "Instalando dependências ..."
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
         if [ "$webserver" = "1" ]; then
             apt-get -y install php7.3 php7.3-cli php7.3-gd php7.3-mysql php7.3-pdo php7.3-mbstring php7.3-tokenizer php7.3-bcmath php7.3-xml php7.3-fpm php7.3-curl php7.3-zip curl tar unzip git redis-server nginx git wget expect
@@ -657,7 +659,7 @@ install_dependencies_0.7.19(){
         fi
     fi
 
-    output "Enabling Services..."
+    output "Habilitando serviços ..."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         systemctl enable redis-server
         service redis-server start
@@ -689,7 +691,7 @@ install_dependencies_0.7.19(){
 }
 
 install_pterodactyl() {
-    output "Creating the databases and setting root password..."
+    output "Criando os bancos de dados e definindo a senha root ..."
     password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
@@ -706,46 +708,50 @@ install_pterodactyl() {
     SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
     mysql -u root -e "$SQL"
 
-    output "Binding MariaDB/MySQL to 0.0.0.0."
+    output "Vinculando MariaDB / MySQL a 0.0.0.0."
         if grep -Fqs "bind-address" /etc/mysql/mariadb.conf.d/50-server.cnf ; then
 		sed -i -- '/bind-address/s/#//g' /etc/mysql/mariadb.conf.d/50-server.cnf
  		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	elif grep -Fqs "bind-address" /etc/mysql/my.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	elif grep -Fqs "bind-address" /etc/my.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/my.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
     	elif grep -Fqs "bind-address" /etc/mysql/my.conf.d/mysqld.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.conf.d/mysqld.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.conf.d/mysqld.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	else
-		output 'A MySQL configuration file could not be detected! Please contact support.'
+		output 'Não foi possível detectar um arquivo de configuração do MySQL! Entre em contato com o suporte.'
 	fi
 
-    output "Downloading Pterodactyl..."
+    output "Baixando o painel"
     mkdir -p /var/www/pterodactyl
     cd /var/www/pterodactyl
     curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/download/${PANEL}/panel.tar.gz
     tar -xzvf panel.tar.gz
     chmod -R 755 storage/* bootstrap/cache/
 
-    output "Installing Pterodactyl..."
-    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+    output "Instalando Pterodactyl..."
+    if [ "$installoption" = "2" ] || [ "$installoption" = "6" ]; then
+    	curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
+    else
+        curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+    fi
     cp .env.example .env
     /usr/local/bin/composer install --no-dev --optimize-autoloader
     php artisan key:generate --force
-    php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/New_York --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+    php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
     php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
-    output "To use PHP's internal mail sending, select [mail]. To use a custom SMTP server, select [smtp]. TLS Encryption is recommended."
+    output "Para usar o envio de correio interno do PHP, selecione [mail]. Para usar um servidor SMTP personalizado, selecione [smtp]. A criptografia TLS é recomendada."
     php artisan p:environment:mail
     php artisan migrate --seed --force
     php artisan p:user:make --email=$email --admin=1
@@ -761,7 +767,7 @@ install_pterodactyl() {
         restorecon -R /var/www/pterodactyl
     fi
 
-    output "Creating panel queue listeners..."
+    output "Criando ouvintes de fila de painel ..."
     (crontab -l ; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1")| crontab -
     service cron restart
 
@@ -815,7 +821,7 @@ EOF
 }
 
 install_pterodactyl_0.7.19() {
-    output "Creating the databases and setting root password..."
+    output "Criando os bancos de dados e definindo a senha root ..."
     password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
@@ -832,39 +838,39 @@ install_pterodactyl_0.7.19() {
     SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
     mysql -u root -e "$SQL"
 
-    output "Binding MariaDB/MySQL to 0.0.0.0."
+    output "Vinculando MariaDB / MySQL a 0.0.0.0."
         if grep -Fqs "bind-address" /etc/mysql/mariadb.conf.d/50-server.cnf ; then
 		sed -i -- '/bind-address/s/#//g' /etc/mysql/mariadb.conf.d/50-server.cnf
  		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	elif grep -Fqs "bind-address" /etc/mysql/my.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	elif grep -Fqs "bind-address" /etc/my.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/my.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
     	elif grep -Fqs "bind-address" /etc/mysql/my.conf.d/mysqld.cnf ; then
         	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.conf.d/mysqld.cnf
 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.conf.d/mysqld.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	else
-		output 'A MySQL configuration file could not be detected! Please contact support.'
+		output 'Não foi possível detectar um arquivo de configuração do MySQL! Entre em contato com o suporte.'
 	fi
 
-    output "Downloading Pterodactyl..."
+    output "Instalando Pterodactyl..."
     mkdir -p /var/www/pterodactyl
     cd /var/www/pterodactyl
     curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/download/${PANEL_LEGACY}/panel.tar.gz
     tar --strip-components=1 -xzvf panel.tar.gz
     chmod -R 755 storage/* bootstrap/cache/
 
-    output "Installing Pterodactyl..."
+    output "Instalando Pterodactyl..."
     curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
     cp .env.example .env
     /usr/local/bin/composer install --no-dev --optimize-autoloader
@@ -887,7 +893,7 @@ install_pterodactyl_0.7.19() {
         restorecon -R /var/www/pterodactyl
     fi
 
-    output "Creating panel queue listeners..."
+    output "Criando ouvintes de fila de painel..."
     (crontab -l ; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1")| crontab -
     service cron restart
 
@@ -958,7 +964,7 @@ upgrade_pterodactyl(){
         semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
         restorecon -R /var/www/pterodactyl
     fi
-    output "Your panel has successfully been updated to version ${PANEL}"
+    output "Seu painel foi atualizado com sucesso para a versão ${PANEL}"
     php artisan up
     php artisan queue:restart
 }
@@ -983,7 +989,7 @@ upgrade_pterodactyl_1.0(){
         semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
         restorecon -R /var/www/pterodactyl
     fi
-    output "Your panel has successfully been updated to version ${PANEL}"
+    output "Seu painel foi atualizado com sucesso para a versão ${PANEL}"
     php artisan up
     php artisan queue:restart
 }
@@ -1006,15 +1012,15 @@ upgrade_pterodactyl_0.7.19(){
         semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
         restorecon -R /var/www/pterodactyl
     fi
-    output "Your panel has successfully been updated to version ${PANEL_LEGACY}."
+    output "Seu painel foi atualizado com sucesso para a versão ${PANEL_LEGACY}."
     php artisan up
     php artisan queue:restart
 }
 
 nginx_config() {
-    output "Disabling default configuration..."
+    output "Desativando configuração padrão..."
     rm -rf /etc/nginx/sites-enabled/default
-    output "Configuring Nginx Webserver..."
+    output "Configurando o servidor da web Nginx ..."
 
 echo '
 server_tokens off;
@@ -1103,9 +1109,9 @@ server {
 }
 
 nginx_config_0.7.19() {
-    output "Disabling default configuration..."
+    output "Desativando configuração padrão ..."
     rm -rf /etc/nginx/sites-enabled/default
-    output "Configuring Nginx Webserver..."
+    output "Configurando o servidor da web Nginx ..."
 
 echo '
 server_tokens off;
@@ -1194,9 +1200,9 @@ server {
 }
 
 apache_config() {
-    output "Disabling default configuration..."
+    output "Desativando configuração padrão ..."
     rm -rf /etc/nginx/sites-enabled/default
-    output "Configuring Apache2 web server..."
+    output "Configurando servidor web Apache2 ..."
 echo '
 <VirtualHost *:80>
   ServerName '"$FQDN"'
@@ -1226,7 +1232,7 @@ echo '
 }
 
 nginx_config_redhat(){
-    output "Configuring Nginx web server..."
+    output "Configurando servidor da web Nginx ..."
 
 echo '
 server_tokens off;
@@ -1319,7 +1325,7 @@ server {
 }
 
 apache_config_redhat() {
-    output "Configuring Apache2 web server..."
+    output "Configurando servidor web Apache2 ..."
 echo '
 <VirtualHost *:80>
   ServerName '"$FQDN"'
@@ -1343,7 +1349,7 @@ echo '
 }
 
 php_config(){
-    output "Configuring PHP socket..."
+    output "Configurando socket PHP ..."
     bash -c 'cat > /etc/php-fpm.d/www-pterodactyl.conf' <<-'EOF'
 [pterodactyl]
 user = nginx
@@ -1428,19 +1434,19 @@ setup_pterodactyl_0.7.19(){
 
 install_wings() {
     cd /root
-    output "Installing Pterodactyl Wings dependencies..."
+    output "Instalando dependências do Pterodactyl Wings ..."
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install curl tar unzip
     elif  [ "$lsb_dist" =  "fedora" ] ||  [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
         yum -y install curl tar unzip
     fi
 
-    output "Installing Docker"
+    output "Instalando Docker"
     curl -sSL https://get.docker.com/ | CHANNEL=stable bash
 
     service docker start
     systemctl enable docker
-    output "Enabling SWAP support for Docker."
+    output "Habilitando o suporte SWAP para Docker."
     sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& swapaccount=1/' /etc/default/grub
     output "Installing the Pterodactyl wings..."
     mkdir -p /etc/pterodactyl /srv/daemon-data
@@ -1465,14 +1471,19 @@ StartLimitInterval=600
 WantedBy=multi-user.target
 EOF
 
+    output "A instalação do Wings está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "Cole seu comando de implantação automática abaixo: "
+    read AUTODEPLOY
+    ${AUTODEPLOY}
+
     systemctl enable wings
     systemctl start wings
-    output "Wings ${WINGS} has now been installed on your system."
+    output "Wings ${WINGS} agora foi instalado em seu sistema."
 }
 
 install_daemon() {
     cd /root
-    output "Installing Pterodactyl Daemon dependencies..."
+    output "Instalando dependências do Pterodactyl Daemon ..."
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install curl tar unzip
     elif  [ "$lsb_dist" =  "fedora" ] ||  [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
@@ -1484,7 +1495,7 @@ install_daemon() {
 
     service docker start
     systemctl enable docker
-    output "Enabling SWAP support for Docker & installing NodeJS..."
+    output "Habilitando o suporte SWAP para Docker e instalando NodeJS ..."
     sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& swapaccount=1/' /etc/default/grub
     if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
         update-grub
@@ -1514,7 +1525,7 @@ install_daemon() {
         yum -y autoremove
         yum -y clean packages
     fi
-    output "Installing the Pterodactyl daemon..."
+    output "Instalando o daemon Pterodactyl ..."
     mkdir -p /srv/daemon /srv/daemon-data
     cd /srv/daemon
     curl -L https://github.com/pterodactyl/daemon/releases/download/${DAEMON_LEGACY}/daemon.tar.gz | tar --strip-components=1 -xzv
@@ -1539,12 +1550,12 @@ EOF
     systemctl daemon-reload
     systemctl enable wings
 
-    output "Daemon installation is nearly complete, please go to the panel and get your 'Auto Deploy' command in the node configuration tab."
-    output "Paste your auto deploy command below: "
+    output "A instalação do Daemon está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "Cole seu comando de implantação automática abaixo: "
     read AUTODEPLOY
     ${AUTODEPLOY}
     service wings start
-    output "Daemon ${DAEMON_LEGACY} has now been installed on your system."
+    output "O Daemon ${DAEMON_LEGACY} agora foi instalado em seu sistema."
 }
 
 migrate_wings(){
@@ -1584,8 +1595,8 @@ upgrade_daemon(){
     npm install -g npm
     npm install --only=production --no-audit --unsafe-perm
     service wings restart
-    output "Your daemon has been updated to version ${DAEMON_LEGACY}."
-    output "npm has been updated to the latest version."
+    output "Seu daemon foi atualizado para a versão ${DAEMON_LEGACY}."
+    output "Npm foi atualizado para a versão mais recente."
 }
 
 install_standalone_sftp(){
@@ -1596,22 +1607,22 @@ install_standalone_sftp(){
         yum -y install jq
     fi
     if [ ! -f /srv/daemon/config/core.json ]; then
-        warn "YOU MUST CONFIGURE YOUR DAEMON PROPERLY BEFORE INSTALLING THE STANDALONE SFTP SERVER!"
+        warn "VOCÊ DEVE CONFIGURAR SEU DAEMON CORRETAMENTE ANTES DE INSTALAR O SERVIDOR SFTP STANDALONE!"
         exit 11
     fi
     cd /srv/daemon
     if [ $(cat /srv/daemon/config/core.json | jq -r '.sftp.enabled') == "null" ]; then
-        output "Updating config to enable sftp-server..."
+        output "Atualizando configuração para habilitar o servidor sftp ..."
         cat /srv/daemon/config/core.json | jq '.sftp.enabled |= false' > /tmp/core
         cat /tmp/core > /srv/daemon/config/core.json
         rm -rf /tmp/core
     elif [ $(cat /srv/daemon/config/core.json | jq -r '.sftp.enabled') == "false" ]; then
-       output "Config already set up for Golang SFTP server."
+       output "Configuração já definida para o servidor Golang SFTP."
     else 
-       output "You may have purposely set the SFTP to true which will cause this to fail."
+       output "Você pode ter definido propositalmente o SFTP como verdadeiro, o que fará com que isso falhe."
     fi
     service wings restart
-    output "Installing standalone SFTP server..."
+    output "Instalando servidor SFTP autônomo ..."
     curl -Lo sftp-server https://github.com/pterodactyl/sftp-server/releases/download/v1.0.5/sftp-server
     chmod +x sftp-server
     bash -c 'cat > /etc/systemd/system/pterosftp.service' <<-'EOF'
@@ -1634,12 +1645,12 @@ EOF
 }
 
 upgrade_standalone_sftp(){
-    output "Turning off the standalone SFTP server..."
+    output "Desligando o servidor SFTP autônomo ..."
     service pterosftp stop
     curl -Lo sftp-server https://github.com/pterodactyl/sftp-server/releases/download/v1.0.5/sftp-server
     chmod +x sftp-server
     service pterosftp start
-    output "Your standalone SFTP server has successfully been updated to v1.0.5."
+    output "Seu servidor SFTP autônomo foi atualizado com sucesso para v1.0.5."
 }
 
 install_mobile(){
@@ -1690,7 +1701,7 @@ install_phpmyadmin(){
 \$cfg['CaptchaLoginPrivateKey'] = '6LcJcjwUAAAAALOcDJqAEYKTDhwELCkzUkNDQ0J5'
 ?>    
 EOF
-    output "Installation completed."
+    output "Instalação completa."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         chown -R www-data:www-data * /var/www/pterodactyl
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
@@ -1702,7 +1713,7 @@ EOF
 }
 
 ssl_certs(){
-    output "Installing Let's Encrypt and creating an SSL certificate..."
+    output "Instalando o Let's Encrypt e criando um certificado SSL ..."
     cd /root
     if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install certbot
@@ -1837,7 +1848,7 @@ enabled = true
 EOF
     service fail2ban restart
 
-    output "Configuring your firewall..."
+    output "Configurando seu firewall ..."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install ufw
         ufw allow 22
@@ -1908,8 +1919,8 @@ EOF
 }
 
 block_icmp(){
-    output "Block ICMP (Ping) Packets?"
-    output "You should choose [1] if you are not using a monitoring system and [2] otherwise."
+    output "Bloquear Pacotes de ICMP (Ping) ?"
+    output "Você deve escolher [1] se você não estiver usando um sistema de monitoramento e [2] de outra forma."
     output "[1] Yes."
     output "[2] No."
     read icmp
@@ -1917,24 +1928,24 @@ block_icmp(){
         1 ) /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP
             (crontab -l ; echo "@reboot /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP >> /dev/null 2>&1")| crontab - 
             ;;
-        2 ) output "Skipping rule..."
+        2 ) output "Pulando regra ..."
             ;;
-        * ) output "You did not enter a valid selection."
+        * ) output "Você não inseriu uma seleção válida."
             block_icmp
     esac    
 }
 
 javapipe_kernel(){
-    output "Apply JavaPipe's kernel configurations (https://javapipe.com/blog/iptables-ddos-protection)?"
+    output "Aplicar as configurações de kernel do JavaPipe (https://javapipe.com/blog/iptables-ddos-protection)?"
     output "[1] Yes."
     output "[2] No."
     read javapipe
     case $javapipe in
         1)  sh -c "$(curl -sSL https://raw.githubusercontent.com/tommytran732/Anti-DDOS-Iptables/master/javapipe_kernel.sh)"
             ;;
-        2)  output "JavaPipe kernel modifications not applied."
+        2)  output "Modificações do kernel JavaPipe não aplicadas."
             ;;
-        * ) output "You did not enter a valid selection."
+        * ) output "Você não inseriu uma seleção válida."
             javapipe_kernel
     esac 
 }
@@ -1950,7 +1961,7 @@ install_database() {
 	    dnf -y install MariaDB-server
 	fi
 
-    output "Creating the databases and setting root password..."
+    output "Criando os bancos de dados e definindo a senha root ..."
     password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
@@ -1967,24 +1978,24 @@ install_database() {
     SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
     mysql -u root -e "$SQL"
 
-    output "Binding MariaDB/MySQL to 0.0.0.0."
+    output "Vinculando MariaDB / MySQL a 0.0.0.0."
 	if [ -f /etc/mysql/my.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/mysql/my.cnf
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/mysql/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	elif [ -f /etc/my.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
     	elif [ -f /etc/mysql/my.conf.d/mysqld.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
-		output 'Restarting MySQL process...'
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
 	else 
-		output 'File my.cnf was not found! Please contact support.'
+		output 'O arquivo my.cnf não foi encontrado! Entre em contato com o suporte.'
 	fi
 
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
@@ -2017,13 +2028,13 @@ broadcast(){
         broadcast_database
     fi
     output "###############################################################"
-    output "FIREWALL INFORMATION"
+    output "INFORMAÇÕES DE FIREWALL"
     output ""
-    output "All unnecessary ports are blocked by default."
+    output "Todas as portas desnecessárias são bloqueadas por padrão."
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
-        output "Use 'ufw allow <port>' to enable your desired ports."
+        output "Use 'ufw allow <port>' para habilitar as portas desejadas."
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] && [ "$dist_version" != "8" ]; then
-        output "Use 'firewall-cmd --permanent --add-port=<port>/tcp' to enable your desired ports."
+        output "Use 'firewall-cmd --permanent --add-port = <port> / tcp' para habilitar as portas desejadas."
     fi
     output "###############################################################"
     output ""
@@ -2031,38 +2042,18 @@ broadcast(){
 
 broadcast_database(){
         output "###############################################################"
-        output "MARIADB/MySQL INFORMATION"
+        output "INFORMAÇÕES MARIADB / MySQL"
         output ""
-        output "Your MariaDB/MySQL root password is $rootpassword"
+        output "Sua senha root MariaDB / MySQL é$rootpassword"
         output ""
-        output "Create your MariaDB/MySQL host with the following information:"
+        output "Crie seu host MariaDB / MySQL com as seguintes informações:"
         output "Host: $SERVER_IP"
-        output "Port: 3306"
+        output "Porta: 3306"
         output "User: admin"
-        output "Password: $adminpassword"
+        output "Senha: $adminpassword"
         output "###############################################################"
         output ""
 }
-
-portsopen(){
-iptables -A INPUT -s 127.0.0.1 -j ACCEPT
-            iptables -A OUTPUT -s 127.0.0.1 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25565,25566,25567,25568,25569,25570,25571,25572,25573,25574 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25575,25576,25577,25578,25579,25580,25581,25582,25583,25584 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25585,25586,25587,25588,25589,25589,25591,25592,25593,25594 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25595,25596,25597,25598,25599,25600,25601,25602,25603,25604 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25605,25606,25607,25608,25609,25610,25611,25612,25613,25614 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25615,25616,25617,25618,25619,25620,25621,25622,25623,25624 -j ACCEPT
-            iptables -I INPUT -p tcp -m multiport --dports 25625,25626,25627,25628,25629,25630,25631,25632,25633,25634 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25565,25566,25567,25568,25569,25570,25571,25572,25573,25574 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25575,25576,25577,25578,25579,25580,25581,25582,25583,25584 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25585,25586,25587,25588,25589,25589,25591,25592,25593,25594 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25595,25596,25597,25598,25599,25600,25601,25602,25603,25604 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25605,25606,25607,25608,25609,25610,25611,25612,25613,25614 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25615,25616,25617,25618,25619,25620,25621,25622,25623,25624 -j ACCEPT
-            iptables -I OUTPUT -p tcp -m multiport --dports 25625,25626,25627,25628,25629,25630,25631,25632,25633,25634 -j ACCEPT        
-            output "As portas foram abertas com sucesso!"
-            }
 
 #Execution
 preflight
@@ -2091,14 +2082,12 @@ case $installoption in
              install_wings
              broadcast
 	     broadcast_database
-         
              ;;
         4)   repositories_setup_0.7.19
              required_infos
              firewall
              ssl_certs
              install_daemon
-             portsopen()
              broadcast
              ;;
         5)   webserver_options
@@ -2108,7 +2097,6 @@ case $installoption in
              ssl_certs
              setup_pterodactyl
              install_wings
-             portsopen()
              broadcast
              ;;
         6)   webserver_options
@@ -2118,7 +2106,6 @@ case $installoption in
              firewall
              setup_pterodactyl_0.7.19
              install_daemon
-             portsopen()
              broadcast
              ;;
         7)   install_standalone_sftp
@@ -2142,7 +2129,6 @@ case $installoption in
              upgrade_pterodactyl_0.7.19
              theme
              upgrade_daemon
-             portsopen()
              ;;
         15)  upgrade_standalone_sftp
              ;;
