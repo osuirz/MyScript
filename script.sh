@@ -19,7 +19,7 @@ preflight(){
     output "Copyright © 2020 Thien Tran <contact@thientran.io>."
     output "Telegram do Revenact: https://t.me/revenact"
     output ""
-    output "Traduzido por yViniSad#0144"
+    output "Traduzido por yViniSad#0144 ( Alterações Constantemente )"
     output ""
 
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
