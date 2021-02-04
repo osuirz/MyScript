@@ -1472,7 +1472,7 @@ WantedBy=multi-user.target
 EOF
 
     output "A instalação do Wings está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
-    output "Cole seu comando de implantação automática abaixo ( Sem o "cd /etc/pterodactyl &&" ): "
+    output "Cole seu comando de implantação automática abaixo ( Sem o 'cd /etc/pterodactyl &&' ): "
     read AUTODEPLOY
     ${AUTODEPLOY}
 
