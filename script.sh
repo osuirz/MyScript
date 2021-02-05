@@ -1,4 +1,92 @@
 #!/bin/bash
+2
+​
+3
+output(){
+4
+    echo -e '\e[36m'$1'\e[0m';
+5
+}
+6
+​
+7
+warn(){
+8
+    echo -e '\e[31m'$1'\e[0m';
+9
+}
+10
+​
+11
+PANEL=v1.2.2
+12
+WINGS=v1.2.3
+13
+PANEL_LEGACY=v0.7.19
+14
+DAEMON_LEGACY=v0.6.13
+15
+PHPMYADMIN=5.0.4
+16
+​
+17
+preflight(){
+18
+    output "Script de Instalação e Atualização do Pterodactyl."
+19
+    output "Copyright © 2020 Thien Tran <contact@thientran.io>."
+20
+    output "Telegram do Revenact: https://t.me/revenact"
+21
+    output ""
+22
+    output "Traduzido por yViniSad#0144 ( Alterações Constantemente )"
+23
+    output ""
+24
+​
+25
+    output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
+26
+    output "Detecção automática do sistema operacional inicializada ..."
+27
+​
+28
+    os_check
+29
+​
+30
+    if [ "$EUID" -ne 0 ]; then
+31
+        output "Por favor, execute como root."
+32
+        exit 3
+33
+    fi
+34
+​
+35
+    output "Detecção automática de arquitetura inicializada ..."
+36
+    MACHINE_TYPE=`uname -m`
+37
+    if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+38
+        output "Servidor de 64 bits detectado! Bom para ir."
+39
+        output ""
+40
+    else
+41
+        output "Arquitetura não suportada detectada! Mude para 64 bits (x86_64)."
+42
+        exit 4
+43
+    fi
+44
+​
+45
+    output "Detecção automática de virtualização inicializada..."#!/bin/bash
 
 output(){
     echo -e '\e[36m'$1'\e[0m';
@@ -19,7 +107,7 @@ preflight(){
     output "Copyright © 2020 Thien Tran <contact@thientran.io>."
     output "Telegram do Revenact: https://t.me/revenact"
     output ""
-    output "Traduzido por yViniSad#0144 ( Alterações Constantemente )"
+    output "Traduzido por yViniSad#0144 ( Ultima atualização: 05/02/2021 ás 20:34)"
     output ""
 
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
@@ -864,20 +952,21 @@ install_pterodactyl_0.7.19() {
 	fi
 
     output "Instalando Pterodactyl..."
-    mkdir -p /var/www/pterodactyl
-    cd /var/www/pterodactyl
-    curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/download/${PANEL_LEGACY}/panel.tar.gz
-    tar --strip-components=1 -xzvf panel.tar.gz
-    chmod -R 755 storage/* bootstrap/cache/
+    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer --1
+mkdir -p /var/www/pterodactyl
+cd /var/www/pterodactyl
 
-    output "Instalando Pterodactyl..."
-    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-    cp .env.example .env
-    /usr/local/bin/composer install --no-dev --optimize-autoloader
+curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/download/v0.7.19/panel.tar.gz
+tar --strip-components=1 -xzvf panel.tar.gz
+chmod -R 755 storage/* bootstrap/cache/
+cp .env.example .env
+composer install --no-dev --optimize-autoloaderphp artisan key:generate --force
     php artisan key:generate --force
-    php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/New_York --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+    php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
     php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
-    output "To use PHP's internal mail sending, select [mail]. To use a custom SMTP server, select [smtp]. TLS Encryption is recommended."
+    
+
+output "To use PHP's internal mail sending, select [mail]. To use a custom SMTP server, select [smtp]. TLS Encryption is recommended."
     php artisan p:environment:mail
     php artisan migrate --seed --force
     php artisan p:user:make --email=$email --admin=1
@@ -942,6 +1031,7 @@ EOF
 	setsebool -P httpd_unified 1
     fi
     sudo systemctl daemon-reload
+    sudo systemctl enable --now redis-server
     systemctl enable pteroq.service
     systemctl start pteroq
 }
