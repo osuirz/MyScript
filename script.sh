@@ -17,7 +17,7 @@ preflight(){
     output "Copyright © 2020 Thien Tran <contact@thientran.io>."
     output "Telegram do Revenact: https://t.me/revenact"
     output ""
-    output "Traduzido por yViniSad#0144 ( Ultima atualização: 05/02/2021 ás 20:34)"
+    output "Traduzido por yViniSad#0144"
     output ""
 
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
@@ -268,7 +268,7 @@ install_options(){
 }
 
 logs(){
-	output "[02/02/2021] Tradução do Pterodactyl"
+	output "[05/02/2021] Tradução do Pterodactyl"
 	output "[07/02/2021] Adicionado troca de URL"
 	output "[07/02/2021] Adicionado função de Logs"
 }
