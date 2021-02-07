@@ -2106,6 +2106,7 @@ ssl_certs
     systemctl start wings
     systemctl restart wings
 
+
 elif [ "$version" = "2"]; then
 	nginx_config_0.7.19
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
@@ -2118,6 +2119,7 @@ elif [ "$version" = "2"]; then
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
+    fi
 }
 
 #Execution
