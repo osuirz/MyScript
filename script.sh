@@ -2217,7 +2217,7 @@ case $installoption in
         22) database_host_reset
             ;;
         23) alterar
-			;;
-		999) logs
-			;;
+	    ;;
+	999) logs
+	    ;;
 esac
