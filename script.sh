@@ -2089,6 +2089,7 @@ checkversion(){
 alterar(){
 	required_infos
 	checkversion
+	cd /var/www/pterodactyl
 
 if ["$version" = "1"]; then
 	nginx_config
