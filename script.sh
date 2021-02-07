@@ -184,6 +184,13 @@ install_options(){
     output "[20] Alterar o tema do Painel (${PANEL_LEGACY} Apenas)."
     output "[21] Redefinição de senha raiz de emergência MariaDB."
     output "[22] Redefinição das informações do host do banco de dados de emergência."
+    output "[23] Alterar o URL do Painel. ( Lembrando, você deve reconfigurar o node. )"
+    output " "
+    output " "
+    output " "
+    output " "
+    output "[999] Ultimas Atualizações"
+
     read choice
     case $choice in
         1 ) installoption=1
@@ -252,13 +259,21 @@ install_options(){
         22 ) installoption=22
             output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
+        22 ) installoption=999
+            output "Você irá ver as logs!."
+            ;;
         * ) output "Você não inseriu uma seleção válida."
             install_options
     esac
 }
 
+logs(){
+	output "[02/02/2021] Tradução do Pterodactyl"
+	output "[07/02/2021] Adicionado troca de URL"
+	output "[07/02/2021] Adicionado função de Logs"
+}
 webserver_options() {
-    output "Selecione qual servidor web você gostaria de usar: \n [1] Nginx (recomendado). \n [2] Apache2 / httpd."
+    output "Selecione qual servidor web você gostaria de usar: \n[1] Nginx (recomendado). \n[2] Apache2/httpd."
     read choice
     case $choice in
         1 ) webserver=1
@@ -2055,6 +2070,55 @@ broadcast_database(){
         output ""
 }
 
+checkversion(){
+	output "Qual é a versão serie do seu Pterodactyl?"
+    output "[1] 1.0."
+    output "[2] 0.7."
+    read version
+    case $version in
+        1 )
+			output "Você está ultilizando a serie 1.0!"
+            ;;
+        2 ) output "Você está ultilizando a serie 0.7!"
+            ;;
+        * ) output "Você não inseriu uma seleção válida."
+            checkversion
+    esac    
+}
+
+alterar(){
+	required_infos
+	checkversion
+
+if ["$version" = "1"]; then
+	nginx_config
+	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+
+    output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "Altere o seu FQDN no node para ${FQDN}"
+    output "Cole seu comando de implantação automática abaixo ( Sem o 'cd /etc/pterodactyl &&' ): "
+    read AUTODEPLOY
+    ${AUTODEPLOY}
+systemctl stop pteroq
+ssl_certs
+    systemctl enable --now wings
+    systemctl start wings
+    systemctl restart wings
+
+elif [ "$version" = "2"]; then
+	nginx_config_0.7.19
+	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+        output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+        output "Altere o seu FQDN no node para ${FQDN}"
+    output "Cole seu comando de implantação automática abaixo: "
+    read AUTODEPLOY
+    ${AUTODEPLOY}
+
+    systemctl enable --now wings
+    systemctl start wings
+    systemctl restart wings
+}
+
 #Execution
 preflight
 install_options
@@ -2151,4 +2215,8 @@ case $installoption in
             ;;
         22) database_host_reset
             ;;
+        23) alterar
+			;;
+		999) logs
+			;;
 esac
