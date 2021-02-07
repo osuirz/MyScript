@@ -2095,6 +2095,7 @@ alterar(){
 	cd /var/www/pterodactyl
 
 if ["$version" = "1"]; then
+systemctl disable --now nginx
 	nginx_config
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
 
@@ -2108,10 +2109,12 @@ ssl_certs
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
-
-
+systemctl start pteroq
+    systemctl enable --now nginx
 elif [ "$version" = "2"]; then
+systemctl disable --now nginx
 	nginx_config_0.7.19
+ ssl_certs
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
         output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
         output "Altere o seu FQDN no node para ${FQDN}"
@@ -2122,7 +2125,9 @@ elif [ "$version" = "2"]; then
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
+    systemctl enable --now nginx
     fi
+    
 }
 
 #Execution
@@ -2222,7 +2227,7 @@ case $installoption in
         22) database_host_reset
             ;;
         23) alterar
-	    ;;
-	0) logs
-	    ;;
+	          ;;
+	      0) logs
+	          ;;
 esac
