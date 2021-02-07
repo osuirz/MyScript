@@ -162,8 +162,8 @@ os_check(){
 
 install_options(){
     output "Selecione uma opção:"
-        output " "
-    output "[0] Ultimas Atualizações"
+       output " "
+    output "[24] Ultimas Atualizações"
     output " "
     output "[1] Instalar o Painel ${PANEL}."
     output "[2] Instalar o Painel ${PANEL_LEGACY}."
@@ -2126,8 +2126,6 @@ elif [ "$version" = "2"]; then
 preflight
 install_options
 case $installoption in 
-	0) logs
-	    ;;
         1)   webserver_options
              repositories_setup
              required_infos
@@ -2221,5 +2219,7 @@ case $installoption in
         22) database_host_reset
             ;;
         23) alterar
+	    ;;
+	24) logs
 	    ;;
 esac
