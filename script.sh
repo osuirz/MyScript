@@ -161,7 +161,10 @@ os_check(){
 }
 
 install_options(){
-    output "Selecione sua opção de instalação:"
+    output "Selecione uma opção:"
+    output "[999] Ultimas Atualizações"
+    output " "
+    output " "
     output "[1] Instalar o Painel ${PANEL}."
     output "[2] Instalar o Painel ${PANEL_LEGACY}."
     output "[3] Instalar o Wings ${WINGS}."
@@ -186,10 +189,7 @@ install_options(){
     output "[22] Redefinição das informações do host do banco de dados de emergência."
     output "[23] Alterar o URL do Painel. ( Lembrando, você deve reconfigurar o node. )"
     output " "
-    output " "
-    output " "
-    output " "
-    output "[999] Ultimas Atualizações"
+
 
     read choice
     case $choice in
@@ -259,7 +259,7 @@ install_options(){
         22 ) installoption=22
             output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
-        22 ) installoption=999
+        22 ) installoption=99
             output "Você irá ver as logs!."
             ;;
         * ) output "Você não inseriu uma seleção válida."
@@ -2220,6 +2220,6 @@ case $installoption in
             ;;
         23) alterar
 	    ;;
-	999) logs
+	99) logs
 	    ;;
 esac
