@@ -2220,6 +2220,6 @@ case $installoption in
             ;;
         23) alterar
 	    ;;
-	24) logs
+	24) logss
 	    ;;
 esac
