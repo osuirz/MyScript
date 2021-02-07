@@ -259,7 +259,10 @@ install_options(){
         22 ) installoption=22
             output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
-        22 ) installoption=0
+	23 ) installoption=23
+            output "Você selecionou ra alteração do url do painel!"
+            ;;
+        0 ) installoption=0
             output "Você irá ver as logs!"
             ;;
         * ) output "Você não inseriu uma seleção válida."
@@ -2220,6 +2223,6 @@ case $installoption in
             ;;
         23) alterar
 	    ;;
-	24) logs
+	0) logs
 	    ;;
 esac
