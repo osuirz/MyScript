@@ -259,8 +259,11 @@ install_options(){
         22 ) installoption=22
             output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
-        22 ) installoption=999
-            output "Você irá ver as logs!"
+	23 ) installoption=23
+            output "Você Solicitou a troca do URL do painel!"
+            ;;
+        0 ) installoption=0
+            output "Você optou por ver as logs!"
             ;;
         * ) output "Você não inseriu uma seleção válida."
             install_options
@@ -711,7 +714,7 @@ install_pterodactyl() {
     Q0="DROP DATABASE IF EXISTS test;"
     Q1="CREATE DATABASE IF NOT EXISTS panel;"
     Q2="SET old_passwords=0;"
-    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'localhost' IDENTIFIED BY '$password';"
+    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
     Q4="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
     Q5="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpassword');"
     Q6="DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
@@ -841,8 +844,8 @@ install_pterodactyl_0.7.19() {
     Q0="DROP DATABASE IF EXISTS test;"
     Q1="CREATE DATABASE IF NOT EXISTS panel;"
     Q2="SET old_passwords=0;"
-    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
-    Q10="SET PASSWORD FOR 'pterodactyl'@'127.0.0.1' = PASSWORD('$password');"
+    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'localhost' IDENTIFIED BY '$password';"
+    Q10="SET PASSWORD FOR 'pterodactyl'@'localhost' = PASSWORD('$password');"
     Q4="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
     Q5="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpassword');"
     Q6="DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
@@ -2225,7 +2228,7 @@ case $installoption in
         22) database_host_reset
             ;;
         23) alterar
-			;;
-		999) logs
-			;;
+	    ;;
+	0) logs
+	    ;;
 esac
