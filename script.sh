@@ -272,18 +272,17 @@ install_options(){
 
 logs(){
 	warn "[05/02/2021]" 
-	output "Tradução do Script"
-	output "Adicionado Forma de ligar o node apos instalar o Wings ${WINGS}."
-	output " "
+	warn "Tradução do Script"
+	warn "Adicionado Forma de ligar o node apos instalar o Wings ${WINGS}."
+	warn " "
 	warn "[07/02/2021]" 
-	output "Adicionado troca de URL"
-	output "Adicionado função de Logs"
-	output " "
+	warn "Adicionado troca de URL"
+	warn "Adicionado função de Logs"
+	warn " "
 	warn "[08/02/2021]" 
-	output "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
-	output "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
+	warn "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
+	warn "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
 	
-	install_options
 }
 webserver_options() {
     output "Selecione qual servidor web você gostaria de usar: \n[1] Nginx (recomendado). \n[2] Apache2/httpd."
