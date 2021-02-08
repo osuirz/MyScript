@@ -878,13 +878,21 @@ install_pterodactyl_0.7.19() {
 
     output "Instalando Pterodactyl..."
     curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer --1
+
 mkdir -p /var/www/pterodactyl
+
 cd /var/www/pterodactyl
+
 curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
+
 tar -xzvf panel.tar.gz
+
 chmod -R 755 storage/* bootstrap/cache/
+
 cp .env.example .env
+
 composer install --no-dev --optimize-autoloader
+
     php artisan key:generate --force
     php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
     php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
@@ -2116,6 +2124,7 @@ elif [ "$version" = "2"]; then
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
+fi
 }
 
 #Execution
