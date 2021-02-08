@@ -1929,8 +1929,9 @@ alterar(){
     warn "Caso n tenha aperte ENTER"
     read pid
     
-    kill pid
+    kill $pid
 certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
+cd /var/www/pterodactyl
 if [ "$version" = "1" ]; then
 	nginx_config
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
