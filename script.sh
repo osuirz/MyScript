@@ -844,7 +844,7 @@ install_pterodactyl_0.7.19() {
     Q0="DROP DATABASE IF EXISTS test;"
     Q1="CREATE DATABASE IF NOT EXISTS panel;"
     Q2="SET old_passwords=0;"
-    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'localhost' IDENTIFIED BY '$password';"
+    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
     Q10="SET PASSWORD FOR 'pterodactyl'@'localhost' = PASSWORD('$password');"
     Q4="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
     Q5="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpassword');"
@@ -853,7 +853,7 @@ install_pterodactyl_0.7.19() {
     Q8="DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
     Q9="FLUSH PRIVILEGES;"
     SQL="${Q0}${Q1}${Q2}${Q3}${Q10}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
-    mysql -u root -e "$SQL"
+    mysql -e "$SQL"
 
     output "Vinculando MariaDB / MySQL a 0.0.0.0."
         if grep -Fqs "bind-address" /etc/mysql/mariadb.conf.d/50-server.cnf ; then
