@@ -845,7 +845,7 @@ install_pterodactyl_0.7.19() {
     Q1="CREATE DATABASE IF NOT EXISTS panel;"
     Q2="SET old_passwords=0;"
     Q3="CREATE USER 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
-    Q4'GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;'
+    Q4"GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;"
     Q5="SET PASSWORD FOR 'pterodactyl'@'localhost' = PASSWORD('$password');"
     Q6="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
     Q7="FLUSH PRIVILEGES;"
