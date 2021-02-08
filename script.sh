@@ -711,7 +711,7 @@ install_pterodactyl() {
     Q0="DROP DATABASE IF EXISTS test;"
     Q1="CREATE DATABASE IF NOT EXISTS panel;"
     Q2="SET old_passwords=0;"
-    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
+    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'localhost' IDENTIFIED BY '$password';"
     Q4="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
     Q5="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpassword');"
     Q6="DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
