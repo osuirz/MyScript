@@ -271,9 +271,16 @@ install_options(){
 }
 
 logs(){
-	output "[05/02/2021] Tradução do Pterodactyl"
-	output "[07/02/2021] Adicionado troca de URL"
-	output "[07/02/2021] Adicionado função de Logs"
+	warn "[05/02/2021]" output "Tradução do Script"
+	warn "[05/02/2021]" output "Adicionado Forma de ligar o node apos instalar o Wings ${WINGS}."
+	output " "
+	warn "[07/02/2021]" output " Adicionado troca de URL"
+	warn "[07/02/2021]" output "Adicionado função de Logs"
+	output " "
+	warn "[08/02/2021]" output "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
+	warn "[08/02/2021]" output "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
+	
+	install_options
 }
 webserver_options() {
     output "Selecione qual servidor web você gostaria de usar: \n[1] Nginx (recomendado). \n[2] Apache2/httpd."
@@ -1953,8 +1960,10 @@ case $installoption in
              setup_pterodactyl
              broadcast
 	     broadcast_database
+	     install_options
              ;;
         2)   bash <(curl -s https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh)
+	install_options
              ;;
         3)   repositories_setup
              required_infos
@@ -1963,6 +1972,7 @@ case $installoption in
              install_wings
              broadcast
 	     broadcast_database
+	     install_options
              ;;
         4)   repositories_setup_0.7.19
              required_infos
@@ -1970,6 +1980,7 @@ case $installoption in
              ssl_certs
              install_daemon
              broadcast
+	     install_options
              ;;
         5)   webserver_options
              repositories_setup
@@ -1979,41 +1990,55 @@ case $installoption in
              setup_pterodactyl
              install_wings
              broadcast
+	     install_options
              ;;
         6)   https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh
              repositories_setup_0.7.19
              install_daemon
              broadcast
+	     install_options
              ;;
         7)   install_standalone_sftp
+	install_options
              ;;
         8)   upgrade_pterodactyl
+	install_options
              ;;
         9)   upgrade_pterodactyl_1.0
+	install_options
              ;;
         10)  theme_options
              upgrade_pterodactyl_0.7.19
              theme
+	     install_options
              ;;
         11)  upgrade_daemon
+	install_options
              ;;
         12)  migrate_wings
+	install_options
              ;;
         13)  upgrade_pterodactyl_1.0
              migrate_wings
+	     install_options
              ;;
         14)  theme_options
              upgrade_pterodactyl_0.7.19
              theme
              upgrade_daemon
+	     install_options
              ;;
         15)  upgrade_standalone_sftp
+	install_options
              ;;
         16)  install_mobile
+	install_options
              ;;
         17)  upgrade_mobile
+	install_options
              ;;
         18)  install_phpmyadmin
+	install_options
              ;;
         19)  repositories_setup
              install_database
@@ -2023,12 +2048,16 @@ case $installoption in
              	upgrade_pterodactyl_0.7.19
              fi
              theme
+	     install_options
             ;;
         21) curl -sSL https://raw.githubusercontent.com/tommytran732/MariaDB-Root-Password-Reset/master/mariadb-104.sh | sudo bash
+	install_options
             ;;
         22) database_host_reset
+	    install_options
             ;;
         23) alterar
+	    install_options
 	    ;;
 	0) logs
 	    ;;
