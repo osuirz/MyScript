@@ -161,10 +161,7 @@ os_check(){
 }
 
 install_options(){
-    output "Selecione uma opção:"
-       output " "
-    output "[24] Ultimas Atualizações"
-    output " "
+    output "Selecione sua opção de instalação:"
     output "[1] Instalar o Painel ${PANEL}."
     output "[2] Instalar o Painel ${PANEL_LEGACY}."
     output "[3] Instalar o Wings ${WINGS}."
@@ -189,7 +186,10 @@ install_options(){
     output "[22] Redefinição das informações do host do banco de dados de emergência."
     output "[23] Alterar o URL do Painel. ( Lembrando, você deve reconfigurar o node. )"
     output " "
-
+    output " "
+    output " "
+    output " "
+    output "[999] Ultimas Atualizações"
 
     read choice
     case $choice in
@@ -259,10 +259,7 @@ install_options(){
         22 ) installoption=22
             output "Você selecionou redefinir as informações do Host do banco de dados."
             ;;
-	23 ) installoption=23
-            output "Você selecionou ra alteração do url do painel!"
-            ;;
-        0 ) installoption=0
+        22 ) installoption=999
             output "Você irá ver as logs!"
             ;;
         * ) output "Você não inseriu uma seleção válida."
@@ -883,12 +880,11 @@ install_pterodactyl_0.7.19() {
     curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer --1
 mkdir -p /var/www/pterodactyl
 cd /var/www/pterodactyl
-
-curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/download/v0.7.19/panel.tar.gz
-tar --strip-components=1 -xzvf panel.tar.gz
+curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
+tar -xzvf panel.tar.gz
 chmod -R 755 storage/* bootstrap/cache/
 cp .env.example .env
-composer install --no-dev --optimize-autoloaderphp artisan key:generate --force
+composer install --no-dev --optimize-autoloader
     php artisan key:generate --force
     php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
     php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
@@ -2092,10 +2088,8 @@ checkversion(){
 alterar(){
 	required_infos
 	checkversion
-	cd /var/www/pterodactyl
 
 if ["$version" = "1"]; then
-systemctl disable --now nginx
 	nginx_config
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
 
@@ -2109,12 +2103,9 @@ ssl_certs
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
-systemctl start pteroq
-    systemctl enable --now nginx
+
 elif [ "$version" = "2"]; then
-systemctl disable --now nginx
 	nginx_config_0.7.19
- ssl_certs
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
         output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
         output "Altere o seu FQDN no node para ${FQDN}"
@@ -2125,9 +2116,6 @@ systemctl disable --now nginx
     systemctl enable --now wings
     systemctl start wings
     systemctl restart wings
-    systemctl enable --now nginx
-    fi
-    
 }
 
 #Execution
@@ -2227,7 +2215,7 @@ case $installoption in
         22) database_host_reset
             ;;
         23) alterar
-	          ;;
-	      0) logs
-	          ;;
+			;;
+		999) logs
+			;;
 esac
