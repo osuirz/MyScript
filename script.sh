@@ -650,61 +650,7 @@ install_dependencies(){
     service mysql start
 }
 
-install_dependencies_0.7.19(){
-    output "Instalando dependências ..."
-    if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
-        if [ "$webserver" = "1" ]; then
-            apt-get -y install php7.3 php7.3-cli php7.3-gd php7.3-mysql php7.3-pdo php7.3-mbstring php7.3-tokenizer php7.3-bcmath php7.3-xml php7.3-fpm php7.3-curl php7.3-zip curl tar unzip git redis-server nginx git wget expect
-        elif [ "$webserver" = "2" ]; then
-            apt-get -y install php7.3 php7.3-cli php7.3-gd php7.3-mysql php7.3-pdo php7.3-mbstring php7.3-tokenizer php7.3-bcmath php7.3-xml php7.3-fpm php7.3-curl php7.3-zip curl tar unzip git redis-server apache2 libapache2-mod-php7.3 redis-server git wget expect
-        fi
-        sh -c "DEBIAN_FRONTEND=noninteractive apt-get install -y --allow-unauthenticated mariadb-server"
-    else
-	if [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        if [ "$dist_version" = "8" ]; then
-	        dnf -y install MariaDB-server MariaDB-client --disablerepo=AppStream
-        fi
-	else
-	    dnf -y install MariaDB-server
-	fi
-	dnf -y module install php:remi-7.3
-        if [ "$webserver" = "1" ]; then
-            dnf -y install redis nginx git policycoreutils-python-utils unzip wget expect jq php-mysql php-zip php-bcmath tar
-        elif [ "$webserver" = "2" ]; then
-            dnf -y install redis httpd git policycoreutils-python-utils mod_ssl unzip wget expect jq php-mysql php-zip php-mcmath tar
-        fi
-    fi
 
-    output "Habilitando serviços ..."
-    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
-        systemctl enable redis-server
-        service redis-server start
-        systemctl enable php7.3-fpm
-        service php7.3-fpm start
-    elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        systemctl enable redis
-        service redis start
-        systemctl enable php-fpm
-        service php-fpm start
-    fi
-
-    systemctl enable cron
-    systemctl enable mariadb
-
-    if [ "$webserver" = "1" ]; then
-        systemctl enable nginx
-        service nginx start
-    elif [ "$webserver" = "2" ]; then
-        if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
-            systemctl enable apache2
-            service apache2 start
-        elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-            systemctl enable httpd
-            service httpd start
-        fi
-    fi
-    service mysql start
-}
 
 install_pterodactyl() {
     output "Criando os bancos de dados e definindo a senha root ..."
@@ -836,138 +782,6 @@ EOF
     systemctl start pteroq
 }
 
-install_pterodactyl_0.7.19() {
-    output "Criando os bancos de dados e definindo a senha root ..."
-    password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
-    adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
-    rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
-    Q0="DROP DATABASE IF EXISTS test;"
-    Q1="CREATE DATABASE IF NOT EXISTS panel;"
-    Q2="SET old_passwords=0;"
-    Q3="CREATE USER 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
-    Q4="GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;"
-    Q5="SET PASSWORD FOR 'pterodactyl'@'localhost' = PASSWORD('$password');"
-    Q6="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
-    Q7="FLUSH PRIVILEGES;"
-    SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}"
-    mysql -u root -e "$SQL"
-
-    output "Vinculando MariaDB / MySQL a 0.0.0.0."
-        if grep -Fqs "bind-address" /etc/mysql/mariadb.conf.d/50-server.cnf ; then
-		sed -i -- '/bind-address/s/#//g' /etc/mysql/mariadb.conf.d/50-server.cnf
- 		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-		output 'Reiniciando o processo MySQL ...'
-		service mysql restart
-	elif grep -Fqs "bind-address" /etc/mysql/my.cnf ; then
-        	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.cnf
-		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.cnf
-		output 'Reiniciando o processo MySQL ...'
-		service mysql restart
-	elif grep -Fqs "bind-address" /etc/my.cnf ; then
-        	sed -i -- '/bind-address/s/#//g' /etc/my.cnf
-		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/my.cnf
-		output 'Reiniciando o processo MySQL ...'
-		service mysql restart
-    	elif grep -Fqs "bind-address" /etc/mysql/my.conf.d/mysqld.cnf ; then
-        	sed -i -- '/bind-address/s/#//g' /etc/mysql/my.conf.d/mysqld.cnf
-		sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/my.conf.d/mysqld.cnf
-		output 'Reiniciando o processo MySQL ...'
-		service mysql restart
-	else
-		output 'Não foi possível detectar um arquivo de configuração do MySQL! Entre em contato com o suporte.'
-	fi
-
-    output "Instalando Pterodactyl..."
-    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer --1
-
-mkdir -p /var/www/pterodactyl
-
-cd /var/www/pterodactyl
-
-curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
-
-tar -xzvf panel.tar.gz
-
-chmod -R 755 storage/* bootstrap/cache/
-
-cp .env.example .env
-
-composer install --no-dev --optimize-autoloader
-
-    php artisan key:generate --force
-    php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
-    php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
-    
-
-output "To use PHP's internal mail sending, select [mail]. To use a custom SMTP server, select [smtp]. TLS Encryption is recommended."
-    php artisan p:environment:mail
-    php artisan migrate --seed --force
-    php artisan p:user:make --email=$email --admin=1
-    if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
-        chown -R www-data:www-data * /var/www/pterodactyl
-    elif  [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        if [ "$webserver" = "1" ]; then
-            chown -R nginx:nginx * /var/www/pterodactyl
-        elif [ "$webserver" = "2" ]; then
-            chown -R apache:apache * /var/www/pterodactyl
-        fi
-	semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
-        restorecon -R /var/www/pterodactyl
-    fi
-
-    output "Criando ouvintes de fila de painel..."
-    (crontab -l ; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1")| crontab -
-    service cron restart
-
-    if  [ "$lsb_dist" =  "ubuntu" ] ||  [ "$lsb_dist" =  "debian" ]; then
-        cat > /etc/systemd/system/pteroq.service <<- 'EOF'
-[Unit]
-Description=Pterodactyl Queue Worker
-After=redis-server.service
-[Service]
-User=www-data
-Group=www-data
-Restart=always
-ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,standard,low --sleep=3 --tries=3
-[Install]
-WantedBy=multi-user.target
-EOF
-    elif  [ "$lsb_dist" =  "fedora" ] ||  [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        if [ "$webserver" = "1" ]; then
-            cat > /etc/systemd/system/pteroq.service <<- 'EOF'
-Description=Pterodactyl Queue Worker
-After=redis-server.service
-[Service]
-User=nginx
-Group=nginx
-Restart=always
-ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,standard,low --sleep=3 --tries=3
-[Install]
-WantedBy=multi-user.target
-EOF
-        elif [ "$webserver" = "2" ]; then
-            cat > /etc/systemd/system/pteroq.service <<- 'EOF'
-[Unit]
-Description=Pterodactyl Queue Worker
-After=redis-server.service
-[Service]
-User=apache
-Group=apache
-Restart=always
-ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,standard,low --sleep=3 --tries=3
-[Install]
-WantedBy=multi-user.target
-EOF
-        fi
-        setsebool -P httpd_can_network_connect 1
-	setsebool -P httpd_execmem 1
-	setsebool -P httpd_unified 1
-    fi
-    sudo systemctl daemon-reload
-    sudo systemctl enable --now redis-server
-    systemctl enable pteroq.service
-    systemctl start pteroq
-}
 
 upgrade_pterodactyl(){
     cd /var/www/pterodactyl
@@ -2140,13 +1954,7 @@ case $installoption in
              broadcast
 	     broadcast_database
              ;;
-        2)   webserver_options
-             theme_options
-             repositories_setup_0.7.19
-             required_infos
-             firewall
-             setup_pterodactyl_0.7.19
-             broadcast
+        2)   bash <(curl -s https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh)
              ;;
         3)   repositories_setup
              required_infos
@@ -2172,12 +1980,8 @@ case $installoption in
              install_wings
              broadcast
              ;;
-        6)   webserver_options
-             theme_options
+        6)   https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh
              repositories_setup_0.7.19
-             required_infos
-             firewall
-             setup_pterodactyl_0.7.19
              install_daemon
              broadcast
              ;;
