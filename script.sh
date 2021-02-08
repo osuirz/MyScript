@@ -189,7 +189,7 @@ install_options(){
     output " "
     output " "
     output " "
-    output "[999] Ultimas Atualizações"
+    output "[0] Ultimas Atualizações"
 
     read choice
     case $choice in
