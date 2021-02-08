@@ -271,14 +271,17 @@ install_options(){
 }
 
 logs(){
-	warn "[05/02/2021]" output "Tradução do Script"
-	warn "[05/02/2021]" output "Adicionado Forma de ligar o node apos instalar o Wings ${WINGS}."
+	warn "[05/02/2021]" 
+	output "Tradução do Script"
+	output "Adicionado Forma de ligar o node apos instalar o Wings ${WINGS}."
 	output " "
-	warn "[07/02/2021]" output " Adicionado troca de URL"
-	warn "[07/02/2021]" output "Adicionado função de Logs"
+	warn "[07/02/2021]" 
+	output "Adicionado troca de URL"
+	output "Adicionado função de Logs"
 	output " "
-	warn "[08/02/2021]" output "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
-	warn "[08/02/2021]" output "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
+	warn "[08/02/2021]" 
+	output "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
+	output "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
 	
 	install_options
 }
