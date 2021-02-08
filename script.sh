@@ -866,6 +866,7 @@ upgrade_pterodactyl_0.7.19(){
 nginx_config() {
     output "Desativando configuração padrão..."
     rm -rf /etc/nginx/sites-enabled/default
+    rm -rf /etc/nginx/sites-enabled/pterodactyl.conf
     output "Configurando o servidor da web Nginx ..."
 
 echo '
@@ -957,6 +958,8 @@ server {
 nginx_config_0.7.19() {
     output "Desativando configuração padrão ..."
     rm -rf /etc/nginx/sites-enabled/default
+        rm -rf /etc/nginx/sites-enabled/default
+    rm -rf /etc/nginx/sites-enabled/pterodactyl.conf
     output "Configurando o servidor da web Nginx ..."
 
 echo '
