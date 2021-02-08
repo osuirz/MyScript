@@ -746,8 +746,8 @@ function ask_letsencrypt {
 function main {
   # check if we can detect an already existing installation
   if [ -d "/var/www/pterodactyl" ]; then
-    print_warning "The script has detected that you already have Pterodactyl panel on your system! You cannot run the script multiple times, it will fail!"
-    echo -e -n "* Are you sure you want to proceed? (S/n): "
+    echo -e -n " AVISO: O script detectou que você já tem o painel Pterodactyl em seu sistema! Você não pode executar o script várias vezes, ele falhará!
+    echo -e -n "* Tem certeza de que deseja continuar? (S/n): "
     read -r CONFIRM_PROCEED
     if [[ ! "$CONFIRM_PROCEED" =~ [Ss] ]]; then
       print_error "Installation aborted!"
