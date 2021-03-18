@@ -371,7 +371,7 @@ dns_check(){
     output "Resolvendo DNS ..."
     SERVER_IP=$(curl -s http://checkip.amazonaws.com)
     DOMAIN_RECORD=$(dig +short ${FQDN})
-    if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
+    if [ "${SERVER_IP}" !="$FQDN" != "${DOMAIN_RECORD}" ]; then
         output ""
         output "O domínio inserido não resolve para o IP público primário deste servidor."
         output "Faça um registro A apontando para o IP do seu servidor. Por exemplo, se você fizer um registro A chamado 'painel' apontando para o IP do seu servidor, seu FQDN é panel.domain.tld"
