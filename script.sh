@@ -111,6 +111,8 @@ preflight(){
     fi
 }
 
+
+
 os_check(){
     if [ -r /etc/os-release ]; then
         lsb_dist="$(. /etc/os-release && echo "$ID")"
@@ -1561,8 +1563,9 @@ EOF
     fi
 }
 
-ssl_certs(){
-    output "Instalando o Let's Encrypt e criando um certificado SSL ..."
+ssl_creator(){
+
+output "Instalando o Let's Encrypt e criando um certificado SSL ..."
     cd /root
     if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install certbot
@@ -1667,6 +1670,24 @@ ssl_certs(){
             fi
         fi
     fi
+
+}
+
+ssl_certs(){
+
+output "Deseja instalar SSL?"
+output ""
+output "[1] Sim"
+output "[2] Não"
+    read sslv
+    case $sslv in
+        1 )  ssl_creator
+            ;;
+        2 ) output "Pulando regra ..."
+            ;;
+        * ) output "Você não inseriu uma seleção válida."
+            ssl_certs()
+    esac    
 }
 
 firewall(){
@@ -1836,7 +1857,10 @@ install_database() {
 	elif [ -f /etc/my.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
-		output 'Reiniciando o processo MySQL ...'
+		output 'Reiniciando o processo MySQL ...'output "Insira so PID que foi mostrado"
+    warn "Coloque, ou não irá funcionar"
+    warn "Caso n tenha aperte ENTER"
+    read pid
 		service mysql restart
     	elif [ -f /etc/mysql/my.conf.d/mysqld.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
