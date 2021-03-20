@@ -1563,10 +1563,6 @@ EOF
     fi
 }
 
-
-
-}
-
 ssl_certs(){
 output "Instalando o Let's Encrypt e criando um certificado SSL ..."
     cd /root
