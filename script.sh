@@ -373,7 +373,7 @@ dns_check(){
     output "Resolvendo DNS ..."
     SERVER_IP=$(curl -s http://checkip.amazonaws.com)
     DOMAIN_RECORD=$(dig +short ${FQDN})
-    if [ "${SERVER_IP}" !="$FQDN" != "${DOMAIN_RECORD}" ]; then
+    if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
         output ""
         output "O domínio inserido não resolve para o IP público primário deste servidor."
         output "Faça um registro A apontando para o IP do seu servidor. Por exemplo, se você fizer um registro A chamado 'painel' apontando para o IP do seu servidor, seu FQDN é panel.domain.tld"
@@ -1563,8 +1563,11 @@ EOF
     fi
 }
 
-ssl_creator(){
 
+
+}
+
+ssl_certs(){
 output "Instalando o Let's Encrypt e criando um certificado SSL ..."
     cd /root
     if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
@@ -1671,23 +1674,6 @@ output "Instalando o Let's Encrypt e criando um certificado SSL ..."
         fi
     fi
 
-}
-
-ssl_certs(){
-
-output "Deseja instalar SSL?"
-output ""
-output "[1] Sim"
-output "[2] Não"
-    read sslv
-    case $sslv in
-        1 )  ssl_creator
-            ;;
-        2 ) output "Pulando regra ..."
-            ;;
-        * ) output "Você não inseriu uma seleção válida."
-            ssl_certs()
-    esac    
 }
 
 firewall(){
