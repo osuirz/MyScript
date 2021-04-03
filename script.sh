@@ -14,14 +14,12 @@ PHPMYADMIN=5.0.4
 
 preflight(){
     output "Script de Instalação e Atualização do Pterodactyl."
-    output "Copyright © 2020 Thien Tran <contact@thientran.io>."
-    output "Telegram do Revenact: https://t.me/revenact"
     output ""
-    output "Traduzido por yViniSad#0144"
     output ""
+    output "Traduzido by 🧧yLuffy_#9492🧧"
 
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
-    output "Detecção automática do sistema operacional inicializada ..."
+    output "Detecção automática do sistema operacional inicializada..."
 
     os_check
 
@@ -69,9 +67,9 @@ preflight(){
     fi
     output ""
     if [ "$virt_serv" != "" ] && [ "$virt_serv" != "kvm" ] && [ "$virt_serv" != "vmware" ] && [ "$virt_serv" != "hyperv" ] && [ "$virt_serv" != "openvz lxc" ] && [ "$virt_serv" != "xen xen-hvm" ] && [ "$virt_serv" != "xen xen-hvm aws" ]; then
-        warn "Unsupported type of virtualization detected. Please consult with your hosting provider whether your server can run Docker or not. Proceed at your own risk."
-        warn "No support would be given if your server breaks at any point in the future."
-        warn "Proceed?\n[1] Yes.\n [2] No."
+        warn "Tipo não compatível de virtualização detectado. Consulte seu provedor de hospedagem se o seu servidor pode executar Docker ou não. Prossiga por sua conta e risco."
+        warn "Nenhum suporte será fornecido se o seu servidor quebrar a qualquer momento no futuro."
+        warn "Continuar?\n[1] Sim.\n [2] Não."
         read choice
         case $choice in 
             1)  output "Prosseguindo ..."
@@ -99,7 +97,7 @@ preflight(){
             exit 6
         fi
     elif echo $(uname -r) | grep -q gcp; then
-        output "Google Cloud Platform detectado."
+        output "Google Cloud detectado."
         warn "Certifique-se de ter uma configuração de IP estático, caso contrário, o sistema não funcionará após a reinicialização."
         warn "Verifique também se o firewall do GCP permite que as portas necessárias para o servidor funcione normalmente."
         warn "Ao criar alocações para este nó, use o IP interno, pois o Google Cloud usa o roteamento NAT."
@@ -110,8 +108,6 @@ preflight(){
         output ""
     fi
 }
-
-
 
 os_check(){
     if [ -r /etc/os-release ]; then
@@ -1564,7 +1560,7 @@ EOF
 }
 
 ssl_certs(){
-output "Instalando o Let's Encrypt e criando um certificado SSL ..."
+    output "Instalando o Let's Encrypt e criando um certificado SSL ..."
     cd /root
     if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install certbot
@@ -1669,7 +1665,6 @@ output "Instalando o Let's Encrypt e criando um certificado SSL ..."
             fi
         fi
     fi
-
 }
 
 firewall(){
@@ -1839,10 +1834,7 @@ install_database() {
 	elif [ -f /etc/my.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
 		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
-		output 'Reiniciando o processo MySQL ...'output "Insira so PID que foi mostrado"
-    warn "Coloque, ou não irá funcionar"
-    warn "Caso n tenha aperte ENTER"
-    read pid
+		output 'Reiniciando o processo MySQL ...'
 		service mysql restart
     	elif [ -f /etc/mysql/my.conf.d/mysqld.cnf ] ; then
         sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
@@ -1981,7 +1973,7 @@ case $installoption in
 	     broadcast_database
 	     install_options
              ;;
-        2)   bash <(curl -s https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh)
+        2)   bash <(curl -s https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh)
 	install_options
              ;;
         3)   repositories_setup
@@ -2011,7 +2003,7 @@ case $installoption in
              broadcast
 	     install_options
              ;;
-        6)   https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh
+        6)   https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh
              repositories_setup_0.7.19
              install_daemon
              broadcast
