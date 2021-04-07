@@ -6,18 +6,21 @@ warn(){
     echo -e '\e[31m'$1'\e[0m';
 }
 
-PANEL=v1.3.2
-WINGS=v1.3.2
+PANEL=v1.3.1
+WINGS=v1.3.1
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
 PHPMYADMIN=5.0.4
 
 preflight(){
     output "Script de Instalação e Atualização do Pterodactyl."
+    output "Raggzinn https://github.com/Raggzinn"
+    output "Revenact https://github.com/Revenact"
     output ""
+    output "Feito por Revenact Tradizido por Raggzinn"
     output ""
-    output "Traduzido by 🧧yLuffy_#9492🧧"
-
+    output "https://github.com/Raggzinn/Pterodactyl"
+    output ""
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
     output "Detecção automática do sistema operacional inicializada..."
 
@@ -816,18 +819,20 @@ upgrade_pterodactyl(){
 upgrade_pterodactyl_1.0(){
     cd /var/www/pterodactyl
     php artisan down
-curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv
-chmod -R 755 storage/* bootstrap/cache
-composer install --no-dev --optimize-autoloader
-php artisan view:clear
-php artisan config:clear
-php artisan migrate --seed --force
-chown -R www-data:www-data /var/www/pterodactyl/*
+    curl -L https://github.com/pterodactyl/panel/releases/download/${PANEL}/panel.tar.gz | tar --strip-components=1 -xzv
+    rm -rf $(find app public resources -depth | head -n -1 | grep -Fv "$(tar -tf panel.tar.gz)")
+    tar -xzvf panel.tar.gz && rm -f panel.tar.gz
+    chmod -R 755 storage/* bootstrap/cache
+    composer install --no-dev --optimize-autoloader
+    php artisan view:clear
+    php artisan config:clear
+    php artisan migrate --force
+    php artisan db:seed --force
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         chown -R www-data:www-data * /var/www/pterodactyl
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        chown -R nginx:nginx /var/www/pterodactyl/*
-        chown -R apache:apache /var/www/pterodactyl/*
+        chown -R apache:apache * /var/www/pterodactyl
+        chown -R nginx:nginx * /var/www/pterodactyl
         semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
         restorecon -R /var/www/pterodactyl
     fi
@@ -838,22 +843,19 @@ chown -R www-data:www-data /var/www/pterodactyl/*
 
 upgrade_pterodactyl_0.7.19(){
     cd /var/www/pterodactyl
-curl -L -o panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
-rm -rf $(find app public resources -depth | head -n -1 | grep -Fv "$(tar -tf panel.tar.gz)")
-tar -xzvf panel.tar.gz && rm -f panel.tar.gz
-chmod -R 755 storage/* bootstrap/cache
-composer install --no-dev --optimize-autoloader
-php artisan view:clear
-php artisan config:clear
-php artisan migrate --force
-php artisan db:seed --force
-
+    php artisan down
+    curl -L https://github.com/pterodactyl/panel/releases/download/${PANEL_LEGACY}/panel.tar.gz | tar --strip-components=1 -xzv
+    chmod -R 755 storage/* bootstrap/cache
+    composer install --no-dev --optimize-autoloader
+    php artisan view:clear
+    php artisan config:clear
+    php artisan migrate --force
+    php artisan db:seed --force
     if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
-        chown -R www-data:www-data *
-
+        chown -R www-data:www-data * /var/www/pterodactyl
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        chown -R apache:apache *
-        chown -R nginx:nginx *
+        chown -R apache:apache * /var/www/pterodactyl
+        chown -R nginx:nginx * /var/www/pterodactyl
         semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?"
         restorecon -R /var/www/pterodactyl
     fi
@@ -1566,4 +1568,511 @@ ssl_certs(){
     if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
         apt-get -y install certbot
     elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
-        
+        yum -y install certbot
+    fi
+    if [ "$webserver" = "1" ]; then
+        service nginx stop
+    elif [ "$webserver" = "2" ]; then
+        if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+            service apache2 stop
+        elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
+            service httpd stop
+        fi
+    fi
+
+    certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
+    
+    if [ "$installoption" = "2" ]; then
+        if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+            ufw deny 80
+        elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
+            firewall-cmd --permanent --remove-port=80/tcp
+            firewall-cmd --reload
+        fi
+    else
+        if [ "$webserver" = "1" ]; then
+            service nginx restart
+        elif [ "$webserver" = "2" ]; then
+            if  [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+                service apache2 restart
+            elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
+                service httpd restart
+            fi
+        fi
+    fi
+       
+        if [ "$lsb_dist" =  "debian" ] || [ "$lsb_dist" =  "ubuntu" ]; then
+        if [ "$installoption" = "1" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --post-hook "service nginx restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service apache2 stop" --post-hook "service apache2 restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "2" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --post-hook "service nginx restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service apache2 stop" --post-hook "service apache2 restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "3" ]; then
+            (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "ufw allow 80" --pre-hook "service wings stop" --post-hook "ufw deny 80" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+        elif [ "$installoption" = "4" ]; then
+            (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "ufw allow 80" --pre-hook "service wings stop" --post-hook "ufw deny 80" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+        elif [ "$installoption" = "5" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --pre-hook "service wings stop" --post-hook "service nginx restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service apache2 stop" --pre-hook "service wings stop" --post-hook "service apache2 restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "6" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --pre-hook "service wings stop" --post-hook "service nginx restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service apache2 stop" --pre-hook "service wings stop" --post-hook "service apache2 restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            fi
+        fi
+    elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
+        if [ "$installoption" = "1" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --post-hook "service nginx restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --post-hook "service httpd restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "2" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --post-hook "service nginx restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --post-hook "service httpd restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "3" ]; then
+            (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "firewall-cmd --add-port=80/tcp && firewall-cmd --reload" --pre-hook "service wings stop" --post-hook "firewall-cmd --remove-port=80/tcp && firewall-cmd --reload" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+        elif [ "$installoption" = "4" ]; then
+            (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "firewall-cmd --add-port=80/tcp && firewall-cmd --reload" --pre-hook "service wings stop" --post-hook "firewall-cmd --remove-port=80/tcp && firewall-cmd --reload" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+        elif [ "$installoption" = "5" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --pre-hook "service wings stop" --post-hook "service nginx restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --pre-hook "service wings stop" --post-hook "service httpd restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "5" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --pre-hook "service wings stop" --post-hook "service nginx restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --pre-hook "service wings stop" --post-hook "service httpd restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            fi
+        elif [ "$installoption" = "6" ]; then
+            if [ "$webserver" = "1" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service nginx stop" --pre-hook "service wings stop" --post-hook "service nginx restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            elif [ "$webserver" = "2" ]; then
+                (crontab -l ; echo '0 0,12 * * * certbot renew --pre-hook "service httpd stop" --pre-hook "service wings stop" --post-hook "service httpd restart" --post-hook "service wings restart" >> /dev/null 2>&1')| crontab -
+            fi
+        fi
+    fi
+}
+
+firewall(){
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        apt -y install iptables
+    elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ] || [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "cloudlinux" ]; then
+        yum -y install iptables
+    fi
+
+    curl -sSL https://raw.githubusercontent.com/tommytran732/Anti-DDOS-Iptables/master/iptables-no-prompt.sh | sudo bash
+    block_icmp
+    javapipe_kernel
+    output "Setting up Fail2Ban..."
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        apt -y install fail2ban
+    elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
+        yum -y install fail2ban
+    fi 
+    systemctl enable fail2ban
+    bash -c 'cat > /etc/fail2ban/jail.local' <<-'EOF'
+[DEFAULT]
+# Ban hosts for ten hours:
+bantime = 36000
+# Override /etc/fail2ban/jail.d/00-firewalld.conf:
+banaction = iptables-multiport
+[sshd]
+enabled = true
+EOF
+    service fail2ban restart
+
+    output "Configurando seu firewall ..."
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        apt-get -y install ufw
+        ufw allow 22
+        if [ "$installoption" = "1" ]; then
+            ufw allow 80
+            ufw allow 443
+            ufw allow 3306
+        elif [ "$installoption" = "2" ]; then
+            ufw allow 80
+            ufw allow 443
+            ufw allow 3306
+        elif [ "$installoption" = "3" ]; then
+            ufw allow 80
+            ufw allow 8080
+            ufw allow 2022
+        elif [ "$installoption" = "4" ]; then
+            ufw allow 80
+            ufw allow 8080
+            ufw allow 2022
+        elif [ "$installoption" = "5" ]; then
+            ufw allow 80
+            ufw allow 443
+            ufw allow 8080
+            ufw allow 2022
+            ufw allow 3306
+        elif [ "$installoption" = "6" ]; then
+            ufw allow 80
+            ufw allow 443
+            ufw allow 8080
+            ufw allow 2022
+            ufw allow 3306
+        fi
+        yes |ufw enable 
+    elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
+        yum -y install firewalld
+        systemctl enable firewalld
+        systemctl start firewalld
+        if [ "$installoption" = "1" ]; then
+            firewall-cmd --add-service=http --permanent
+            firewall-cmd --add-service=https --permanent 
+            firewall-cmd --add-service=mysql --permanent
+        elif [ "$installoption" = "2" ]; then
+            firewall-cmd --add-service=http --permanent
+            firewall-cmd --add-service=https --permanent
+            firewall-cmd --add-service=mysql --permanent
+        elif [ "$installoption" = "3" ]; then
+            firewall-cmd --permanent --add-service=80/tcp
+            firewall-cmd --permanent --add-port=2022/tcp
+            firewall-cmd --permanent --add-port=8080/tcp
+        elif [ "$installoption" = "4" ]; then
+            firewall-cmd --permanent --add-service=80/tcp
+            firewall-cmd --permanent --add-port=2022/tcp
+            firewall-cmd --permanent --add-port=8080/tcp
+        elif [ "$installoption" = "5" ]; then
+            firewall-cmd --add-service=http --permanent
+            firewall-cmd --add-service=https --permanent 
+            firewall-cmd --permanent --add-port=2022/tcp
+            firewall-cmd --permanent --add-port=8080/tcp
+            firewall-cmd --permanent --add-service=mysql
+        elif [ "$installoption" = "6" ]; then
+            firewall-cmd --add-service=http --permanent
+            firewall-cmd --add-service=https --permanent
+            firewall-cmd --permanent --add-port=2022/tcp
+            firewall-cmd --permanent --add-port=8080/tcp
+            firewall-cmd --permanent --add-service=mysql
+        fi
+    fi
+}
+
+block_icmp(){
+    output "Bloquear Pacotes de ICMP (Ping) ?"
+    output "Você deve escolher [1] se você não estiver usando um sistema de monitoramento e [2] de outra forma."
+    output "[1] Yes."
+    output "[2] No."
+    read icmp
+    case $icmp in
+        1 ) /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP
+            (crontab -l ; echo "@reboot /sbin/iptables -t mangle -A PREROUTING -p icmp -j DROP >> /dev/null 2>&1")| crontab - 
+            ;;
+        2 ) output "Pulando regra ..."
+            ;;
+        * ) output "Você não inseriu uma seleção válida."
+            block_icmp
+    esac    
+}
+
+javapipe_kernel(){
+    output "Aplicar as configurações de kernel do JavaPipe (https://javapipe.com/blog/iptables-ddos-protection)?"
+    output "[1] Yes."
+    output "[2] No."
+    read javapipe
+    case $javapipe in
+        1)  sh -c "$(curl -sSL https://raw.githubusercontent.com/tommytran732/Anti-DDOS-Iptables/master/javapipe_kernel.sh)"
+            ;;
+        2)  output "Modificações do kernel JavaPipe não aplicadas."
+            ;;
+        * ) output "Você não inseriu uma seleção válida."
+            javapipe_kernel
+    esac 
+}
+
+install_database() {
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        apt -y install mariadb-server
+	elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "rhel" ]; then
+        if [ "$dist_version" = "8" ]; then
+	        dnf -y install MariaDB-server MariaDB-client --disablerepo=AppStream
+        fi
+	else 
+	    dnf -y install MariaDB-server
+	fi
+
+    output "Criando os bancos de dados e definindo a senha root ..."
+    password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    Q0="DROP DATABASE IF EXISTS test;"
+    Q1="CREATE DATABASE IF NOT EXISTS panel;"
+    Q2="SET old_passwords=0;"
+    Q3="GRANT ALL ON panel.* TO 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '$password';"
+    Q4="GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP, EXECUTE, PROCESS, RELOAD, LOCK TABLES, CREATE USER ON *.* TO 'admin'@'$SERVER_IP' IDENTIFIED BY '$adminpassword' WITH GRANT OPTION;"
+    Q5="SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$rootpassword');"
+    Q6="DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+    Q7="DELETE FROM mysql.user WHERE User='';"
+    Q8="DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
+    Q9="FLUSH PRIVILEGES;"
+    SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
+    mysql -u root -e "$SQL"
+
+    output "Vinculando MariaDB / MySQL a 0.0.0.0."
+	if [ -f /etc/mysql/my.cnf ] ; then
+        sed -i -- 's/bind-address/# bind-address/g' /etc/mysql/my.cnf
+		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/mysql/my.cnf
+		output 'Reiniciando o processo MySQL ...'
+		service mysql restart
+	elif [ -f /etc/my.cnf ] ; then
+        sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
+		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
+		output 'Reiniciando o processo MySQL ...'
+		service mysql restart
+    	elif [ -f /etc/mysql/my.conf.d/mysqld.cnf ] ; then
+        sed -i -- 's/bind-address/# bind-address/g' /etc/my.cnf
+		sed -i '/\[mysqld\]/a bind-address = 0.0.0.0' /etc/my.cnf
+		output 'Reiniciando o processo MySQL ...'
+		service mysql restart
+	else 
+		output 'O arquivo my.cnf não foi encontrado! Entre em contato com o suporte.'
+	fi
+
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        yes | ufw allow 3306
+    elif [ "$lsb_dist" =  "centos" ] || [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "rhel" ]; then
+        firewall-cmd --permanent --add-service=mysql
+        firewall-cmd --reload
+    fi 
+
+    broadcast_database
+}
+
+database_host_reset(){
+    SERVER_IP=$(curl -s http://checkip.amazonaws.com)
+    adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    Q0="SET old_passwords=0;"
+    Q1="SET PASSWORD FOR 'admin'@'$SERVER_IP' = PASSWORD('$adminpassword');"
+    Q2="FLUSH PRIVILEGES;"
+    SQL="${Q0}${Q1}${Q2}"
+    mysql mysql -e "$SQL"
+    output "New database host information:"
+    output "Host: $SERVER_IP"
+    output "Port: 3306"
+    output "User: admin"
+    output "Password: $adminpassword"
+}
+
+broadcast(){
+    if [ "$installoption" = "1" ] || [ "$installoption" = "3" ]; then
+        broadcast_database
+    fi
+    output "###############################################################"
+    output "INFORMAÇÕES DE FIREWALL"
+    output ""
+    output "Todas as portas desnecessárias são bloqueadas por padrão."
+    if [ "$lsb_dist" =  "ubuntu" ] || [ "$lsb_dist" =  "debian" ]; then
+        output "Use 'ufw allow <port>' para habilitar as portas desejadas."
+    elif [ "$lsb_dist" =  "fedora" ] || [ "$lsb_dist" =  "centos" ] && [ "$dist_version" != "8" ]; then
+        output "Use 'firewall-cmd --permanent --add-port = <port> / tcp' para habilitar as portas desejadas."
+    fi
+    output "###############################################################"
+    output ""
+}
+
+broadcast_database(){
+        output "###############################################################"
+        output "INFORMAÇÕES MARIADB / MySQL"
+        output ""
+        output "Sua senha root MariaDB / MySQL é$rootpassword"
+        output ""
+        output "Crie seu host MariaDB / MySQL com as seguintes informações:"
+        output "Host: $SERVER_IP"
+        output "Porta: 3306"
+        output "User: admin"
+        output "Senha: $adminpassword"
+        output "###############################################################"
+        output ""
+}
+
+checkversion(){
+	output "Qual é a versão serie do seu Pterodactyl?"
+    output "[1] 1.0."
+    output "[2] 0.7."
+    read version
+    case $version in
+        1 )
+			output "Você está ultilizando a serie 1.0!"
+            ;;
+        2 ) output "Você está ultilizando a serie 0.7!"
+            ;;
+        * ) output "Você não inseriu uma seleção válida."
+            checkversion
+    esac    
+}
+
+alterar(){
+	required_infos
+	checkversion
+	netstat -tulpn | grep :80
+    output "Insira so PID que foi mostrado"
+    warn "Coloque, ou não irá funcionar"
+    warn "Caso n tenha aperte ENTER"
+    read pid
+    
+    kill $pid
+certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
+cd /var/www/pterodactyl
+if [ "$version" = "1" ]; then
+	nginx_config
+	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+
+    output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "Altere o seu FQDN no node para ${FQDN}"
+    output "Cole seu comando de implantação automática abaixo ( Sem o 'cd /etc/pterodactyl &&' ): "
+    read AUTODEPLOY
+    ${AUTODEPLOY}
+systemctl stop pteroq
+ssl_certs
+    systemctl enable --now wings
+    systemctl start wings
+    systemctl restart wings
+
+elif [ "$version" = "2"]; then
+	nginx_config_0.7.19
+	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=America/Sao_Paulo --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
+        output "A troca do url do painel está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+        output "Altere o seu FQDN no node para ${FQDN}"
+    output "Cole seu comando de implantação automática abaixo: "
+    read AUTODEPLOY
+    ${AUTODEPLOY}
+
+    systemctl enable --now wings
+    systemctl start wings
+    systemctl restart wings
+fi
+}
+
+#Execution
+preflight
+install_options
+case $installoption in 
+        1)   webserver_options
+             repositories_setup
+             required_infos
+             firewall
+             setup_pterodactyl
+             broadcast
+	     broadcast_database
+	     install_options
+             ;;
+        2)   bash <(curl -s https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh)
+	install_options
+             ;;
+        3)   repositories_setup
+             required_infos
+             firewall
+             ssl_certs
+             install_wings
+             broadcast
+	     broadcast_database
+	     install_options
+             ;;
+        4)   repositories_setup_0.7.19
+             required_infos
+             firewall
+             ssl_certs
+             install_daemon
+             broadcast
+	     install_options
+             ;;
+        5)   webserver_options
+             repositories_setup
+             required_infos
+             firewall
+             ssl_certs
+             setup_pterodactyl
+             install_wings
+             broadcast
+	     install_options
+             ;;
+        6)   https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh
+             repositories_setup_0.7.19
+             install_daemon
+             broadcast
+	     install_options
+             ;;
+        7)   install_standalone_sftp
+	install_options
+             ;;
+        8)   upgrade_pterodactyl
+	install_options
+             ;;
+        9)   upgrade_pterodactyl_1.0
+	install_options
+             ;;
+        10)  theme_options
+             upgrade_pterodactyl_0.7.19
+             theme
+	     install_options
+             ;;
+        11)  upgrade_daemon
+	install_options
+             ;;
+        12)  migrate_wings
+	install_options
+             ;;
+        13)  upgrade_pterodactyl_1.0
+             migrate_wings
+	     install_options
+             ;;
+        14)  theme_options
+             upgrade_pterodactyl_0.7.19
+             theme
+             upgrade_daemon
+	     install_options
+             ;;
+        15)  upgrade_standalone_sftp
+	install_options
+             ;;
+        16)  install_mobile
+	install_options
+             ;;
+        17)  upgrade_mobile
+	install_options
+             ;;
+        18)  install_phpmyadmin
+	install_options
+             ;;
+        19)  repositories_setup
+             install_database
+             ;;
+        20)  theme_options
+             if [ "$themeoption" = "1" ]; then
+             	upgrade_pterodactyl_0.7.19
+             fi
+             theme
+	     install_options
+            ;;
+        21) curl -sSL https://raw.githubusercontent.com/tommytran732/MariaDB-Root-Password-Reset/master/mariadb-104.sh | sudo bash
+	install_options
+            ;;
+        22) database_host_reset
+	    install_options
+            ;;
+        23) alterar
+	    install_options
+	    ;;
+	0) logs
+	    ;;
+esac
