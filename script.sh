@@ -6,20 +6,19 @@ warn(){
     echo -e '\e[31m'$1'\e[0m';
 }
 
-PANEL=v1.3.1
-WINGS=v1.3.1
+PANEL=v1.3.2
+WINGS=v1.3.2
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
 PHPMYADMIN=5.0.4
 
 preflight(){
     output "Script de Instalação e Atualização do Pterodactyl."
-    output "Raggzinn https://github.com/Raggzinn"
-    output "Revenact https://github.com/Revenact"
     output ""
-    output "Feito por Revenact Tradizido por Raggzinn"
-    output ""
-    output "https://github.com/Raggzinn/Pterodactyl"
+    warn "Desenvolvido por Revenact."
+    warn "Traduzido por yLuffy_#9492"
+    warn ""
+    warn "A remoção dos creditos pode se resultar em sérios acontecimentos
     output ""
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
     output "Detecção automática do sistema operacional inicializada..."
