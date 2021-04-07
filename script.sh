@@ -1,4 +1,4 @@
-#!
+bash -c 'cat > /root/bash.sh' <<-'EOF'
 output(){
     echo -e '\e[36m'$1'\e[0m';
 }
@@ -2077,3 +2077,5 @@ case $installoption in
 	0) logs
 	    ;;
 esac
+EOF
+bash /root/bash.sh
