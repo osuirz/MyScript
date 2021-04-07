@@ -1,4 +1,3 @@
-echo '
 output(){
     echo -e '\e[36m'$1'\e[0m';
 }
@@ -7,14 +6,15 @@ warn(){
     echo -e '\e[31m'$1'\e[0m';
 }
 
-PANEL=v1.3.2
-WINGS=v1.3.2
+PANEL=v1.3.1
+WINGS=v1.3.1
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
 PHPMYADMIN=5.0.4
 
 preflight(){
     output "Script de Instalação e Atualização do Pterodactyl."
+    output "Iremos Executar o script."
     output ""
     warn "Traduzido por yLuffy_#9492"
     warn "Desenvolvido por Revenact."
@@ -24,7 +24,11 @@ preflight(){
     output ""
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
     output "Detecção automática do sistema operacional inicializada..."
-sleep 10
+    output ""
+    warn "Aguarde 10 segundos, estamos verificando o seu Sistema Operacional."
+    output ""
+    sleep 10
+
     os_check
 
     if [ "$EUID" -ne 0 ]; then
@@ -2077,5 +2081,3 @@ case $installoption in
 	0) logs
 	    ;;
 esac
-' | sudo -E tee /root/bash.sh >/dev/null 2>&1
-bash /root/bash.sh
