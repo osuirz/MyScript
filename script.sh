@@ -18,14 +18,12 @@ preflight(){
     warn "Traduzido por yLuffy_#9492"
     warn "Desenvolvido por Revenact."
     warn ""
-    warn ""
     warn "A remoção dos creditos e alterado para o teu nome ou de outra pessoa pode resultar em sérios problemas."
     output ""
-    output "https://github.com/Raggzinn/Pterodactyl"
     output ""
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
     output "Detecção automática do sistema operacional inicializada..."
-
+sleep 10
     os_check
 
     if [ "$EUID" -ne 0 ]; then
