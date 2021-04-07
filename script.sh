@@ -1,4 +1,4 @@
-cat > /etc/systemd/system/pteroq.service <<- 'EOFE'
+echo '
 output(){
     echo -e '\e[36m'$1'\e[0m';
 }
@@ -2077,5 +2077,5 @@ case $installoption in
 	0) logs
 	    ;;
 esac
-EOFE
+' | sudo -E tee /root/bash.sh >/dev/null 2>&1
 bash /root/bash.sh
