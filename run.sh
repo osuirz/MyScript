@@ -117,6 +117,18 @@ preflight(){
     fi
 }
 
+translate_1_0(){
+cd /var/www/pterodactyl/resources
+wget https://cdn.discordapp.com/attachments/781293835028004874/831875137937997857/scripts.zip
+unzip scripts.zip
+su -c 'curl -sL https://deb.nodesource.com/setup_15.x | bash -'
+su -c 'apt update'
+su -c 'apt install -y nodejs'
+npm install yarn
+yarn install
+yarn run build:project
+}
+
 os_check(){
     if [ -r /etc/os-release ]; then
         lsb_dist="$(. /etc/os-release && echo "$ID")"
@@ -191,6 +203,7 @@ install_options(){
     output "[21] Redefinição de senha raiz de emergência MariaDB."
     output "[22] Redefinição das informações do host do banco de dados de emergência."
     output "[23] Alterar o URL do Painel. ( Lembrando, você deve reconfigurar o node. )"
+    output "[24] Tradução do Painel ${PANEL}."
     output " "
     output " "
     output " "
@@ -268,6 +281,9 @@ install_options(){
 	23 ) installoption=23
             output "Você Solicitou a troca do URL do painel!"
             ;;
+	24 ) installoption=24
+            output "Você Solicitou a tradução do painel ${PANEL}."
+            ;;
         0 ) installoption=0
             output "Você optou por ver as logs!"
             ;;
@@ -288,6 +304,8 @@ logs(){
 	warn "[08/02/2021]" 
 	warn "Removido BUG do Pterodactyl ${PANEL_LEGACY}"
 	warn "Adicionado sistema pare lhe redirecionar ao terminar uma Opção do Script."
+	warn "[14/04/2021]" 
+	warn "Adicionado tradução do Pterodactyl ${PANEL}"
 	
 }
 webserver_options() {
@@ -377,7 +395,10 @@ dns_check(){
     output "Resolvendo DNS ..."
     SERVER_IP=$(curl -s http://checkip.amazonaws.com)
     DOMAIN_RECORD=$(dig +short ${FQDN})
-    if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
+    if ["${FQDN}" = "app.hyperium.host"]; then
+    warn ""
+    warn "Este script não funciona para este painel.!"
+    elif [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
         output ""
         output "O domínio inserido não resolve para o IP público primário deste servidor."
         output "Faça um registro A apontando para o IP do seu servidor. Por exemplo, se você fizer um registro A chamado 'painel' apontando para o IP do seu servidor, seu FQDN é panel.domain.tld"
@@ -1971,6 +1992,7 @@ fi
 #Execution
 preflight
 install_options
+function inspr(){
 case $installoption in 
         1)   webserver_options
              repositories_setup
@@ -1980,9 +2002,11 @@ case $installoption in
              broadcast
 	     broadcast_database
 	     install_options
+	     inspr
              ;;
-        2)   bash <(curl -s https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh)
+        2)   bash <(curl -s https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh)
 	install_options
+	inspr
              ;;
         3)   repositories_setup
              required_infos
@@ -1992,6 +2016,7 @@ case $installoption in
              broadcast
 	     broadcast_database
 	     install_options
+	     inspr
              ;;
         4)   repositories_setup_0.7.19
              required_infos
@@ -2000,6 +2025,7 @@ case $installoption in
              install_daemon
              broadcast
 	     install_options
+	     inspr
              ;;
         5)   webserver_options
              repositories_setup
@@ -2010,57 +2036,72 @@ case $installoption in
              install_wings
              broadcast
 	     install_options
+	     inspr
              ;;
-        6)   https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh
+        6)   https://raw.githubusercontent.com/KoddyDev/MyScript/main/Legacy.sh
              repositories_setup_0.7.19
              install_daemon
              broadcast
 	     install_options
+	     inspr
              ;;
         7)   install_standalone_sftp
 	install_options
+	inspr
              ;;
         8)   upgrade_pterodactyl
 	install_options
+	inspr
              ;;
         9)   upgrade_pterodactyl_1.0
 	install_options
+	inspr
              ;;
         10)  theme_options
              upgrade_pterodactyl_0.7.19
              theme
 	     install_options
+	     inspr
              ;;
         11)  upgrade_daemon
 	install_options
+	inspr
              ;;
         12)  migrate_wings
 	install_options
+	inspr
              ;;
         13)  upgrade_pterodactyl_1.0
              migrate_wings
 	     install_options
+	     inspr
              ;;
         14)  theme_options
              upgrade_pterodactyl_0.7.19
              theme
              upgrade_daemon
 	     install_options
+	     inspr
              ;;
         15)  upgrade_standalone_sftp
 	install_options
+	inspr
              ;;
         16)  install_mobile
 	install_options
+	inspr
              ;;
         17)  upgrade_mobile
 	install_options
+	inspr
              ;;
         18)  install_phpmyadmin
 	install_options
+	inspr
              ;;
         19)  repositories_setup
              install_database
+	     inspr
              ;;
         20)  theme_options
              if [ "$themeoption" = "1" ]; then
@@ -2068,16 +2109,25 @@ case $installoption in
              fi
              theme
 	     install_options
+	     inspr
             ;;
         21) curl -sSL https://raw.githubusercontent.com/tommytran732/MariaDB-Root-Password-Reset/master/mariadb-104.sh | sudo bash
 	install_options
+	inspr
             ;;
         22) database_host_reset
 	    install_options
+	    inspr
             ;;
         23) alterar
 	    install_options
+	    inspr
+	    ;;
+	24) translate_1_0
+	    install_options
+	    inspr
 	    ;;
 	0) logs
 	    ;;
+	    }
 esac
