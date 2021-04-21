@@ -1,5 +1,6 @@
+#!/bin/bash
 output(){
-    echo -e '\e[36m'$1'\e[0m';
+    echo -e '\e[37m'$1'\e[0m';
 }
 
 warn(){
@@ -10,24 +11,21 @@ PANEL=v1.3.2
 WINGS=v1.3.2
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
-PHPMYADMIN=5.0.4
+PHPMYADMIN=5.1.0
 
 preflight(){
     output "Script de Instalação e Atualização do Pterodactyl."
-    output "Iremos Executar o script."
-    output ""
-    warn "Traduzido por yLuffy_#9492"
-    warn "Desenvolvido por Revenact."
+	warn "http://github.com/KoddyDev"
     warn ""
-    warn "A remoção dos creditos e alterado para o teu nome ou de outra pessoa pode resultar em sérios problemas."
-    output ""
-    output ""
+    warn "Informações do Script"
+	warn ""
+	warn "Versão: " output " 1.0"
+	warn "Autor: " output "KoddyDev#5439"
+	warn ""
+    warn ""
+    warn ""
     output "Observe que este script deve ser instalado em um novo sistema operacional. Instalá-lo em um sistema operacional não novo pode causar problemas."
     output "Detecção automática do sistema operacional inicializada..."
-    output ""
-    warn "Aguarde 10 segundos, estamos verificando o seu Sistema Operacional."
-    output ""
-    sleep 10
 
     os_check
 
@@ -67,7 +65,7 @@ preflight(){
         output "Virtualização: Xen-HVM detectado."
     elif [ "$virt_serv" = "xen xen-hvm aws" ]; then
         output "Virtualização: Xen-HVM detectado no AWS."
-        warn "Ao criar alocações para este nó, use o IP interno, pois o Google Cloud usa o roteamento NAT."
+        warn "Ao criar alocações para este node, use o IP interno, pois o Google Cloud usa o roteamento NAT."
         warn "Retomando em 10 segundos ..."
         sleep 10
     else
@@ -108,7 +106,7 @@ preflight(){
         output "Google Cloud detectado."
         warn "Certifique-se de ter uma configuração de IP estático, caso contrário, o sistema não funcionará após a reinicialização."
         warn "Verifique também se o firewall do GCP permite que as portas necessárias para o servidor funcione normalmente."
-        warn "Ao criar alocações para este nó, use o IP interno, pois o Google Cloud usa o roteamento NAT."
+        warn "Ao criar alocações para este node, use o IP interno, pois o Google Cloud usa o roteamento NAT."
         warn "Retomando em 10 segundos ..."
         sleep 10
     else
@@ -1326,7 +1324,7 @@ StartLimitInterval=600
 WantedBy=multi-user.target
 EOF
 
-    output "A instalação do Wings está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "A instalação do Wings está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do node."
     output "Cole seu comando de implantação automática abaixo ( Sem o 'cd /etc/pterodactyl &&' ): "
     read AUTODEPLOY
     ${AUTODEPLOY}
@@ -1405,7 +1403,7 @@ EOF
     systemctl daemon-reload
     systemctl enable wings
 
-    output "A instalação do Daemon está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do nó."
+    output "A instalação do Daemon está quase concluída, vá para o painel e obtenha o comando 'Auto Deploy' na guia de configuração do node."
     output "Cole seu comando de implantação automática abaixo: "
     read AUTODEPLOY
     ${AUTODEPLOY}
@@ -1968,6 +1966,25 @@ elif [ "$version" = "2"]; then
 fi
 }
 
+translate(){
+wget https://cdn.discordapp.com/attachments/831582323102318602/834523005564616754/scripts.zip
+mkdir /archives/
+mkdir /archives/temp
+mv scripts.zip /archives/temp
+cd /var/www/pterodactyl/resources
+unzip /archives/temp/scripts.zip
+su -c 'apt update'
+su -c 'apt install -y curl'
+su -c 'curl -sL https://deb.nodesource.com/setup_15.x | bash -'
+su -c 'apt update'
+su -c 'apt install -y nodejs'
+cd /var/www/pterodactyl/
+npm install yarn
+yarn install
+yarn run build:production
+warn "Tradução realizada com sucesso"
+}
+
 #Execution
 preflight
 install_options
@@ -1981,7 +1998,7 @@ case $installoption in
 	     broadcast_database
 	     install_options
              ;;
-        2)   bash <(curl -s https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh)
+        2)   bash <(curl -s https://ragg.tech/Pterodactyl/dir/Legacy.sh)
 	install_options
              ;;
         3)   repositories_setup
@@ -2011,7 +2028,7 @@ case $installoption in
              broadcast
 	     install_options
              ;;
-        6)   https://raw.githubusercontent.com/Raggzinn/Pterodactyl/main/Legacy.sh
+        6)   https://ragg.tech/Pterodactyl/dir/Legacy.sh
              repositories_setup_0.7.19
              install_daemon
              broadcast
@@ -2078,6 +2095,8 @@ case $installoption in
         23) alterar
 	    install_options
 	    ;;
+		24) tanslate
+		;;
 	0) logs
 	    ;;
 esac
