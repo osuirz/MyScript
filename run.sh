@@ -189,7 +189,7 @@ install_options(){
     output "[21] Redefinição de senha raiz de emergência MariaDB."
     output "[22] Redefinição das informações do host do banco de dados de emergência."
     output "[23] Alterar o URL do Painel. ( Lembrando, você deve reconfigurar o node. )"
-    output "[24] Instalar a tradução do Painel ${PANEL}."
+    output "[25] Instalar a tradução do Painel ${PANEL}."
     output " "
     output " "
     output " "
@@ -266,7 +266,7 @@ install_options(){
 	23 ) installoption=23
             output "Você Solicitou a troca do URL do painel!"
             ;;
-	23 ) installoption=24
+	23 ) installoption=25
             output "Você Solicitou a instalação !"
             ;;
         0 ) installoption=0
@@ -2098,7 +2098,7 @@ case $installoption in
         23) alterar
 	    install_options
 	    ;;
-	24) tanslate
+	25) tanslate
 	    ;;
 	0) logs
 	    ;;
