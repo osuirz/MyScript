@@ -1971,6 +1971,7 @@ fi
 
 translate(){
 wget https://cdn.discordapp.com/attachments/831582323102318602/834543751879196703/scripts.zip
+clear
 mkdir /archives/
 mkdir /archives/temp
 mv scripts.zip /archives/temp
@@ -1982,6 +1983,7 @@ su -c 'curl -sL https://deb.nodesource.com/setup_15.x | bash -'
 su -c 'apt update'
 su -c 'apt install -y nodejs'
 cd /var/www/pterodactyl/
+npm install
 npm install yarn
 yarn install
 yarn run build:production
