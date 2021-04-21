@@ -266,7 +266,7 @@ install_options(){
 	23 ) installoption=23
             output "Você Solicitou a troca do URL do painel!"
             ;;
-	23 ) installoption=25
+	25 ) installoption=25
             output "Você Solicitou a instalação !"
             ;;
         0 ) installoption=0
