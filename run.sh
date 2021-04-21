@@ -267,7 +267,7 @@ install_options(){
             output "Você Solicitou a troca do URL do painel!"
             ;;
 	24 ) installoption=24
-            output "Você Solicitou a instalação da tradução do Painel ${PANEL}.""
+            output "Você Solicitou a instalação da tradução do Painel ${PANEL}."
             ;;
         0 ) installoption=0
             output "Você optou por ver as logs!"
@@ -2098,8 +2098,8 @@ case $installoption in
         23) alterar
 	    install_options
 	    ;;
-		24) tanslate
-		;;
+	24) tanslate
+	    ;;
 	0) logs
 	    ;;
 esac
