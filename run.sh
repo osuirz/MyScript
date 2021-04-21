@@ -266,8 +266,8 @@ install_options(){
 	23 ) installoption=23
             output "Você Solicitou a troca do URL do painel!"
             ;;
-	24 ) installoption=24
-            output "Você Solicitou a instalação da tradução do Painel ${PANEL}."
+	23 ) installoption=24
+            output "Você Solicitou a instalação !"
             ;;
         0 ) installoption=0
             output "Você optou por ver as logs!"
