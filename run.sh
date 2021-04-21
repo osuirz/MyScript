@@ -1970,7 +1970,7 @@ fi
 }
 
 translate(){
-wget https://cdn.discordapp.com/attachments/831582323102318602/834523005564616754/scripts.zip
+wget https://cdn.discordapp.com/attachments/831582323102318602/834543751879196703/scripts.zip
 mkdir /archives/
 mkdir /archives/temp
 mv scripts.zip /archives/temp
@@ -1985,6 +1985,7 @@ cd /var/www/pterodactyl/
 npm install yarn
 yarn install
 yarn run build:production
+rm -r /archives/temp
 warn "Tradução realizada com sucesso"
 }
 
