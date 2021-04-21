@@ -1979,12 +1979,11 @@ cd /var/www/pterodactyl/resources
 unzip /archives/temp/scripts.zip
 su -c 'apt update'
 su -c 'apt install -y curl'
-su -c 'curl -sL https://deb.nodesource.com/setup_15.x | bash -'
+su -c 'curl -sL https://deb.nodesource.com/setup_14.x | bash -'
 su -c 'apt update'
 su -c 'apt install -y nodejs'
 cd /var/www/pterodactyl/
-npm install
-npm install yarn
+npm install -g yarn
 yarn install
 yarn run build:production
 rm -r /archives/temp
