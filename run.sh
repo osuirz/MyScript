@@ -2098,7 +2098,7 @@ case $installoption in
         23) alterar
 	    install_options
 	    ;;
-	25) trranslate
+	25) translate
 	    ;;
 	0) logs
 	    ;;
