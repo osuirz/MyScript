@@ -2098,7 +2098,8 @@ case $installoption in
         23) alterar
 	    install_options
 	    ;;
-	25) translate
+	25) warn "Instalando..."
+	    translate
 	    ;;
 	0) logs
 	    ;;
