@@ -7,8 +7,8 @@ warn(){
     echo -e '\e[31m'$1'\e[0m';
 }
 
-PANEL=v1.4.2
-WINGS=v1.4.5
+PANEL=v1.6.0
+WINGS=v1.5.0
 PANEL_LEGACY=v0.7.19
 DAEMON_LEGACY=v0.6.13
 PHPMYADMIN=5.1.0
