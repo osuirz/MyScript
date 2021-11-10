@@ -2010,7 +2010,6 @@ case $installoption in
              install_wings
              broadcast
 	     broadcast_database
-	     install_options
              ;;
         4)   repositories_setup_0.7.19
              required_infos
@@ -2018,7 +2017,6 @@ case $installoption in
              ssl_certs
              install_daemon
              broadcast
-	     install_options
              ;;
         5)   webserver_options
              repositories_setup
@@ -2028,7 +2026,7 @@ case $installoption in
              setup_pterodactyl
              install_wings
              broadcast
-	     install_options
+	     broadcast_database
              ;;
         6)   https://ragg.tech/Pterodactyl/dir/Legacy.sh
              repositories_setup_0.7.19
