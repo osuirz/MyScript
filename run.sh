@@ -127,7 +127,7 @@ os_check(){
     fi
     
     if [ "$lsb_dist" =  "ubuntu" ]; then
-        if  [ "$dist_version" != "20.04" ] && [ "$dist_version" != "18.04" ]; then
+        if  [ "$dist_version" != "20.04" ] && [ "$dist_version" != "18.04" ] && [ "$dist_version" != "21.04" ]; then
             output "Versão não suportada do Ubuntu. Apenas Ubuntu 20.04 e 18.04 são suportados."
             exit 2
         fi
